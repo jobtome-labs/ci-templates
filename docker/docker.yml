@@ -1,9 +1,15 @@
 include:
   - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v2.7.0/templates/docker.yml'
 
+image: gdiener/dind-bash:v1.1.0
+services: [ "docker:dind" ]
+
+variables:
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+
 build:
   stage: build
-  extends: .docker
   script:
     - &connection |
       # DOCKER LOGIN PHASE
@@ -75,7 +81,6 @@ build:
 
 build:cache:
   stage: build
-  extends: .docker
   script:
     - *connection
     - |
@@ -147,7 +152,6 @@ build:cache:
 
 build:latest:
   stage: build
-  extends: .docker
   script:
     - *connection
     - |
@@ -205,7 +209,6 @@ build:latest:
 
 push:
   stage: push
-  extends: .docker
   script:
     - *connection
     - |

@@ -1,7 +1,0 @@
-.docker:
-  image: gdiener/dind-bash:v1.1.0
-  services: [ "docker:dind" ]
-
-variables:
-  DOCKER_BUILDKIT: 1
-  COMPOSE_DOCKER_CLI_BUILD: 1
