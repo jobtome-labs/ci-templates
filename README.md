@@ -76,6 +76,7 @@ my-project
 According to the operation / the type of pipeline you have to perform, you can pick here different stages, and put the snippet as indicated in your `.gitlab-ci.yml`:
 
 - [Linting](#linting)
+  - [Terraform linting](#linting-terraform)
 - Tests
   - [Docker-compose tests](#unit-test-stage)
 - [Docker pipeline](#docker-pipeline)
@@ -101,6 +102,7 @@ According to the operation / the type of pipeline you have to perform, you can p
 - [Google cloud run](#google-cloud-run)
 - [Terraform pipeline](#terraform-pipeline)
 - [Terraform security check](#terraform-security-score)
+- [Terraform linting](#linting-terraform)
 - [Notify sentry of release](#notify-sentry-of-release)
 
 Finally some [advice](#general-advices) on how to try the pipeline (for development).
@@ -181,7 +183,9 @@ See [here](https://github.com/zegl/kube-score/blob/master/README_CHECKS.md) for 
 
 NB: The test `label_values` needs to be skipped because of the values `${CI_COMMIT_TAG}` (which will be replaced by `envsubst` later in the pipeline) causing validation fail.
 
-# Unit test stage
+See in the terraform section for [linting terraform](#linting-terraform) manifests.
+
+## Unit test stage
 
 ```yaml
 include:
@@ -775,6 +779,25 @@ include:
 stages:
   - test
 ```
+
+## Linting Terraform
+
+```yaml
+include:
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/<REF>/lint-terraform.yml'
+
+stages:
+  - lint
+
+variables:
+
+  # optional, used to enable reviewdog
+  ENABLE_REVIEWDOG: 1
+  REVIEWDOG_GITLAB_API_TOKEN: <personal gitlab token used to call v4 api endpoints>
+  REVIEWDOG_LEVEL: warning # optional, values: info, warning, error
+```
+
+The Review Dog instructions as described in the [lint section](#linting).
 
 ## Notify sentry of release
 

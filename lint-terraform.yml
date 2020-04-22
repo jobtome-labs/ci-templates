@@ -1,0 +1,53 @@
+lint:terraform:
+  stage: lint
+  image: linuxbandit/tflint-reviewdog:v1.0.0
+  variables:
+    GITLAB_API: ${CI_API_V4_URL}
+  script:
+    - |
+
+      if [ -n "${TF_FOLDER_PATH}" ]; then
+        cd "${TF_FOLDER_PATH}"
+      fi
+
+      echo
+      echo "-> Downloading Terraform modules:"
+      echo
+
+      terraform --version
+      terraform init -backend=false
+
+      if [[ -z "${LINT_PATH}" ]]; then
+        LINT_PATH="."
+      fi
+
+      echo
+      echo "-> Linting Terraform files:"
+      echo
+
+      if [ "${ENABLE_REVIEWDOG}" = "1" ]; then
+        echo
+        echo "-> Enabled Review Dog!"
+        echo
+
+        if [ -z "${REVIEWDOG_GITLAB_API_TOKEN}" ]; then
+          echo
+          echo "-> [WARNING] Missing 'REVIEWDOG_GITLAB_API_TOKEN' variable!"
+          echo
+          exit 1
+        fi
+
+        if [ -z "${REVIEWDOG_LEVEL}" ]; then
+          REVIEWDOG_LEVEL="warning"
+        fi
+
+        tflint --format "parsable" "${LINT_PATH}" | reviewdog -name="Terraform linter" \
+          -efm="%f:%l:%c: %m" -diff="git diff master" -reporter=gitlab-mr-discussion -level="${INPUT_LEVEL}"
+
+      else
+        tflint "${LINT_PATH}"
+      fi
+
+      echo
+      echo "-> Terraform files checked!"
+      echo
