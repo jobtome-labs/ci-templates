@@ -181,6 +181,22 @@ See [here](https://github.com/zegl/kube-score/blob/master/README_CHECKS.md) for 
 
 NB: The test `label_values` needs to be skipped because of the values `${CI_COMMIT_TAG}` (which will be replaced by `envsubst` later in the pipeline) causing validation fail.
 
+### Linting shell files
+
+```yaml
+include:
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/<REF>/lint-shell.yml'
+
+stages:
+  - lint
+
+variables:
+  # optional, used to enable reviewdog
+  ENABLE_REVIEWDOG: 1
+  REVIEWDOG_GITLAB_API_TOKEN: <personal gitlab token used to call v4 api endpoints>
+  REVIEWDOG_LEVEL: warning # optional, values: info, warning, error
+```
+
 # Unit test stage
 
 ```yaml

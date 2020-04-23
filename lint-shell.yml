@@ -1,0 +1,42 @@
+lint:shell:
+  stage: lint
+  image: linuxbandit/shellcheck-reviewdog:v1.0.0
+  variables:
+    GITLAB_API: ${CI_API_V4_URL}
+  script:
+    - |
+
+      if [[ -z "${LINT_PATH}" ]]; then
+        LINT_PATH="."
+      fi
+
+      echo
+      echo "-> Linting shell files:"
+      echo
+
+      if [ "${ENABLE_REVIEWDOG}" = "1" ]; then
+        echo
+        echo "-> Enabled Review Dog!"
+        echo
+
+        if [ -z "${REVIEWDOG_GITLAB_API_TOKEN}" ]; then
+          echo
+          echo "-> [WARNING] Missing 'REVIEWDOG_GITLAB_API_TOKEN' variable!"
+          echo
+          exit 1
+        fi
+
+        if [ -z "${REVIEWDOG_LEVEL}" ]; then
+          REVIEWDOG_LEVEL="warning"
+        fi
+
+        shellcheck -f json $(find "${LINT_PATH}" -type f -name "*.sh") | reviewdog -name="Shellcheck linter" \
+          -efm="%f:%l:%c: %m" -diff="git diff master" -reporter=gitlab-mr-discussion -level="${INPUT_LEVEL}"
+
+      else
+        shellcheck -f json $(find "${LINT_PATH}" -type f -name "*.sh")
+      fi
+
+      echo
+      echo "-> Shell files checked!"
+      echo
