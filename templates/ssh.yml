@@ -12,31 +12,15 @@
       done
 
       # CONNECTION PHASE
-      eval $(ssh-agent -s)
-      mkdir ~/.ssh
-      touch ~/.ssh/known_hosts ~/.ssh/id_rsa
-      chmod -R 644 ~/.ssh
-
-      echo "${SSH_PRIVATE_KEY}" | base64 -d > ~/.ssh/id_rsa
+      apk update && apk add openssh-client
+      echo "$SSH_PRIVATE_KEY" > gitlab-deploy && chmod 400 gitlab-deploy
 
       # DEPLOY PHASE
       echo
       echo "-> Executing command through ssh!"
       echo
 
-      COMMAND_TO_RUN=( ssh -i ~/.ssh/id_rsa )
-
-      if [ -n "${SSH_KNOWN_HOSTS}" ]; then
-        echo "${SSH_KNOWN_HOSTS}" | base64 -d > ~/.ssh/known_hosts
-      else
-        echo
-        echo "-> Disabling strict host key checking!"
-        echo
-
-        COMMAND_TO_RUN+=( -o StrictHostKeyChecking=no )
-      fi
-
-      COMMAND_TO_RUN+=( "${SSH_USER}@${SSH_HOST}" "${SSH_COMMAND}")
+      COMMAND_TO_RUN=( ssh -i gitlab-deploy -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "${SSH_USER}@${SSH_HOST}" "${SSH_COMMAND}")
 
       ${COMMAND_TO_RUN[@]}
 
