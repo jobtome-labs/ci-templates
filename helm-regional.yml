@@ -1,5 +1,5 @@
 include:
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v2.29.3/helm-quality.yml'
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/fix/wrong-environment/helm-quality.yml'
 
 deploy:production:helm:
   extends: .deploy:production:helm
