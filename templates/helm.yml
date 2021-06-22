@@ -54,7 +54,7 @@
       fi
 
       if [ -n "${APP_NAME_BRANCH}" ]; then
-        ENVIRONMENT=quality
+        ENVIRONMENT=feature
       fi
 
       if [ -d "${HELM_DIR}/${ENVIRONMENT}" ]; then
