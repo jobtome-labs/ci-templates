@@ -62,6 +62,7 @@ deploy:quality:helm:branches:
   
 stop:quality:
   extends: .stop
+  allow_failure: true
   environment:
     name: ${CI_COMMIT_REF_SLUG}
     url: https://${DOMAIN}
