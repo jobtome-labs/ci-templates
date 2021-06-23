@@ -139,7 +139,7 @@
     - &helmapply |
       cat << EOF > /tmp/replacer.sh
       #!/bin/bash
-      sed 's/name: "${NAMESPACE}"/name: "${APP_NAME}"/g' | sed 's/-tls/-tls-${APP_NAME}/g' | awk '/deployment.yaml|service.yaml|ingress.yaml/,/---/'
+      sed 's/name: "${NAMESPACE}"/name: "${APP_NAME}"/g' | sed 's/-tls/-tls-${APP_NAME}/g' | awk '/deployment.yaml|service.yaml|ingress.yaml|configmap.yaml/,/---/'
       EOF
 
       chmod 755 /tmp/replacer.sh
