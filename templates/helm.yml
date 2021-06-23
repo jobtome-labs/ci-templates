@@ -104,6 +104,8 @@
           echo "${SECRET_YAML}" | base64 -d >> /tmp/secrets.yaml
         fi
 
+        cat /tmp/secrets.yaml
+
         envsubst < /tmp/secrets.yaml > /tmp/secrets.yaml.tmp && mv /tmp/secrets.yaml.tmp /tmp/secrets.yaml
 
         kubectl apply -f /tmp/secrets.yaml
