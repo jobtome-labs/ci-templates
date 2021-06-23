@@ -9,27 +9,44 @@ deploy:quality:helm:branches:
     GOOGLE_KEY: ${GOOGLE_KEY_QUALITY}
     CLUSTER_NAME: ${CLUSTER_NAME_QUALITY}
     CLUSTER_ZONE: ${CLUSTER_ZONE_QUALITY}
-    SECRET_YAML: ${SECRET_YAML_FEATURE}
+    #SECRET_YAML: ${SECRET_YAML_FEATURE}
     NAMESPACE: ${NAMESPACE_QUALITY}
     ENVIRONMENT: feature
     APP_NAME: ${CI_COMMIT_REF_SLUG}
   before_script:
     - |
+      # use a specific CI/CD variable if SECRET_BRANCH is specified in gitlab-ci
+      if [ -n "${SECRET_BRANCH}" ]; then
+        sec=${SECRET_BRANCH}
+      # otherwise, use default SECRET_YAML_FEATURE CI/CD variable
+      else
+        sec=${SECRET_YAML_FEATURE}
+      fi
+      export SECRET_YAML=$( eval echo \$sec )
+    - echo ${SECRET_YAML}
+
+    -|
+      # use a specific domain if DOMAIN_BRANCH is specified in gitlab-ci
       if [ -n "${DOMAIN_BRANCH}" ]; then
         db=${CI_COMMIT_REF_SLUG}.${DOMAIN_BRANCH}
+      # otherwise, use default DOMAIN_QUALITY
       else
         db=${CI_COMMIT_REF_SLUG}.${DOMAIN_QUALITY}
       fi
       export DOMAIN=$( eval echo \$db )
     - echo ${DOMAIN}
+
     - |
+      # use a specific host if APP_NAME_BRANCH is specified in gitlab-ci
       if [ -n "${APP_NAME_BRANCH}" ]; then
         app=${APP_NAME_BRANCH}
+      # otherwise, use default CI_COMMIT_REF_SLUG
       else
         app=${CI_COMMIT_REF_SLUG}
       fi
       export APP_NAME_BRANCH=$( eval echo \$app )
     - echo ${APP_NAME_BRANCH}
+    
     - |
       # CHECK VARIABLES PHASE
       for var in "GOOGLE_KEY_QUALITY" "CLUSTER_NAME_QUALITY" "CLUSTER_ZONE_QUALITY" "NAMESPACE_QUALITY"; do
