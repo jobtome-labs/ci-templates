@@ -25,7 +25,7 @@ deploy:quality:helm:branches:
       export SECRET_YAML=$( eval echo \$sec )
     - echo ${SECRET_YAML}
 
-    -|
+    - |
       # use a specific domain if DOMAIN_BRANCH is specified in gitlab-ci
       if [ -n "${DOMAIN_BRANCH}" ]; then
         db=${CI_COMMIT_REF_SLUG}.${DOMAIN_BRANCH}
