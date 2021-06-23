@@ -17,12 +17,11 @@ deploy:quality:helm:branches:
     - |
       # use a specific CI/CD variable if SECRET_BRANCH is specified in gitlab-ci
       if [ -n "${SECRET_BRANCH}" ]; then
-        sec=${SECRET_BRANCH}
+        export SECRET_YAML=${!SECRET_BRANCH}
       # otherwise, use default SECRET_YAML_FEATURE CI/CD variable
       else
-        sec=${SECRET_YAML_FEATURE}
+        export SECRET_YAML=${SECRET_YAML_FEATURE}
       fi
-      export SECRET_YAML=$( eval echo \$sec )
     - echo ${SECRET_YAML}
 
     - |
