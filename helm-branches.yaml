@@ -33,7 +33,7 @@ deploy:quality:helm:branches:
         db=${CI_COMMIT_REF_SLUG}.${DOMAIN_QUALITY}
       fi
       export DOMAIN=$( eval echo \$db )
-    - echo ${DOMAIN}
+    - echo https://${DOMAIN}
 
     - |
       # use a specific host if APP_NAME_BRANCH is specified in gitlab-ci
