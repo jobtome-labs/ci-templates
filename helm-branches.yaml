@@ -1,7 +1,7 @@
 deploy:quality:helm:branches:
   extends: .helm:deploy
   environment:
-    name: ${CI_COMMIT_REF_SLUG}
+    name: review/$CI_BUILD_REF_NAME
     url: https://${DOMAIN}
     on_stop: stop:quality
   variables:
@@ -64,8 +64,7 @@ stop:quality:
   extends: .stop
   allow_failure: true
   environment:
-    name: ${CI_COMMIT_REF_SLUG}
-    url: https://${DOMAIN}
+    name: review/$CI_BUILD_REF_NAME
     action: stop
   stage: stop
   variables:
