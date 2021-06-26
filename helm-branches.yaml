@@ -2,7 +2,7 @@ deploy:quality:helm:branches:
   extends: .helm:deploy
   environment:
     name: review/$CI_BUILD_REF_NAME
-    url: https://${DOMAIN}
+    url: https://${CI_COMMIT_REF_SLUG}.${DOMAIN_QUALITY}
     on_stop: stop:quality
   variables:
     CI_COMMIT_TAG: ${CI_COMMIT_SHORT_SHA}
