@@ -54,6 +54,30 @@ deploy:quality:helm:branches:
             exit 1
           fi
       done
+      
+    - |
+      # CLONE DB
+      URL=$( echo $SECRET_YAML | base64 -d | grep DATABASE_URL | awk '{ print $2}' | base64 -d )
+      if [-z $URL]; then
+        DB_USERNAME=$( echo $SECRET_YAML | base64 -d | grep DB_USERNAME | awk '{ print $2}' | base64 -d )
+        DB_PASSWORD=$( echo $SECRET_YAML | base64 -d | grep DB_PASSWORD | awk '{ print $2}' | base64 -d )
+        DB_HOST=$( echo $SECRET_YAML | base64 -d | grep DB_HOST | awk '{ print $2}' | base64 -d )
+        DB_NAME=$( echo $SECRET_YAML | base64 -d | grep DB_HOST | awk '{ print $2}' | base64 -d )
+        for var in "DB_USERNAME" "DB_PASSWORD" "DB_HOST" "DB_NAME"; do
+          if [ -z "${!var}" ]; then
+            echo "Warning: Missing '${var}' variable or DATABASE_URL! Not proceeding with DB cloning"
+            no_db=1
+            break
+          fi
+        done
+        if [ -z "$(no_db)" ]; then
+          mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST -e "USE $DB_NAME" || { echo 'DB login failed! Please check credentials' ; exit 1; }
+          mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST -e "CREATE DATABASE $DB_NAME_$APP_BRANCH_NAME;" || { echo 'DB creation failed! Please check user permission, must have CREATE, REFERENCES and DROP' ; exit 1; }
+          mysqldump -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST $DB_NAME --opt --single-transaction --skip-add-locks | mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST --max_allowed_packet=32M $DB_NAME_$APP_BRANCH_NAME || { echo 'DB cloning failed!' ; exit 1; }
+        fi
+      else
+        eval(echo $URL | awk -v branch_name="$APP_BRANCH_NAME" -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "CREATE DATABASE " "\x60" $8"_"branch_name "\x60" "\x27" " ; mysqldump -u" $4 " -p" $5 " -h" $6 " " $8 " --opt --single-transaction --skip-add-locks | mysql -u" $4 " -p" $5 " -h" $6 " --max_allowed_packet=32M " $8"_"branch_name}') || { echo 'DB cloning failed with URL! Please check credentials' ; exit 1; } 
+      fi
   only:
     - merge_requests
   except:
@@ -85,3 +109,25 @@ stop:quality:
             exit 1
           fi
       done
+    - |
+      # CLONE DB
+      URL=$( echo $SECRET_YAML | base64 -d | grep DATABASE_URL | awk '{ print $2}' | base64 -d )
+      if [-z $URL]; then
+        DB_USERNAME=$( echo $SECRET_YAML | base64 -d | grep DB_USERNAME | awk '{ print $2}' | base64 -d )
+        DB_PASSWORD=$( echo $SECRET_YAML | base64 -d | grep DB_PASSWORD | awk '{ print $2}' | base64 -d )
+        DB_HOST=$( echo $SECRET_YAML | base64 -d | grep DB_HOST | awk '{ print $2}' | base64 -d )
+        DB_NAME=$( echo $SECRET_YAML | base64 -d | grep DB_HOST | awk '{ print $2}' | base64 -d )
+        for var in "DB_USERNAME" "DB_PASSWORD" "DB_HOST" "DB_NAME"; do
+          if [ -z "${!var}" ]; then
+            echo "Warning: Missing '${var}' variable or DATABASE_URL! Not proceeding with DB cloning"
+            no_db=1
+            break
+          fi
+        done
+        if [ -z "$(no_db)" ]; then
+          mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST -e "USE $DB_NAME" || { echo 'DB login failed! Please check credentials' ; exit 1; }
+          mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST -e "DROP DATABASE $DB_NAME_$APP_BRANCH_NAME;" || { echo 'DB deletion failed! Please check user permission, must have CREATE, REFERENCES and DROP' ; exit 1; }
+        fi
+      else
+        eval(echo $URL | awk -v branch_name="$APP_BRANCH_NAME" -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "DROP DATABASE " "\x60" $8"_"branch_name "\x60" "\x27" ";') || { echo 'DB deletion failed with URL! Please check credentials' ; exit 1; }
+      fi
