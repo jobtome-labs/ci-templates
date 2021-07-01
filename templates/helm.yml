@@ -99,8 +99,8 @@
             GOOGLE_APPLICATION_CREDENTIALS=/tmp/sops.json sops --config /tmp/.sops.yaml -d "${HELM_FILES_PATH}/secrets.yaml" > /tmp/secrets.yaml
           fi
         fi
-        
-                if [ -n "${SECRET_YAML}" ]; then
+
+        if [ -n "${SECRET_YAML}" ]; then
           echo "${SECRET_YAML}" | base64 -d >> /tmp/secrets.yaml
         fi
 
