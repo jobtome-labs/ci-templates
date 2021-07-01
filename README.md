@@ -632,6 +632,8 @@ and adding as the *last* stage `- stop`.
 
 Doing so will create a new helm deployment in QA based on the commit slug when the branch name starts with "feat". Once you're done, the branch deployment will be automatically deleted. This requires also to set up a values.yaml in the helm/feature/ folder (you may juspy quality one as a starting point).
 
+You need to place a helm/feature/values.yaml manifest to be used in helm deployment in feature branches. Initially you can copy/paste quality one, you can customize configmaps here to be review-app specific. You can also create a feature branch specific secret as a Gitlab CI/CD variable called SECRET_YAML_FEATURE, or an even more specific secret defined in gitlab-ci.yml as SECRET_BRANCH=whateverspecificsecretyouwant. Just please, use a a different "name:" for the configmap and the secrets, in order to avoid overwriting quality ones when appropriate.
+
 Branch domain and app name can be overriden in gitlab-ci.yml using these variables:
 
 DOMAIN_BRANCH: "mydomain.tld"
