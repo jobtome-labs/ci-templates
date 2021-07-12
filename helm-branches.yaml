@@ -58,6 +58,7 @@ deploy:quality:helm:branches:
     - |
       # CLONE DB
       URL=$( echo $SECRET_YAML | base64 -d | grep DATABASE_URL | awk '{ print $2}' | base64 -d )
+      echo "${URL}"
       if [ -z "${URL}" ]; then
         DB_USERNAME=$( echo $SECRET_YAML | base64 -d | grep DB_USERNAME | awk '{ print $2}' | base64 -d )
         DB_PASSWORD=$( echo $SECRET_YAML | base64 -d | grep DB_PASSWORD | awk '{ print $2}' | base64 -d )
@@ -76,6 +77,7 @@ deploy:quality:helm:branches:
           mysqldump -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST $DB_NAME --opt --single-transaction --skip-add-locks | mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST --max_allowed_packet=32M $DB_NAME_$APP_BRANCH_NAME || echo 'DB cloning failed!' ; exit 1;
         fi
       else
+        echo $URL | awk -v branch_name="$APP_BRANCH_NAME" -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "CREATE DATABASE " "\x60" $8"_"branch_name "\x60" "\x27" " ; mysqldump -u" $4 " -p" $5 " -h" $6 " " $8 " --opt --single-transaction --skip-add-locks | mysql -u" $4 " -p" $5 " -h" $6 " --max_allowed_packet=32M " $8"_"branch_name}'
         eval $( echo $URL | awk -v branch_name="$APP_BRANCH_NAME" -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "CREATE DATABASE " "\x60" $8"_"branch_name "\x60" "\x27" " ; mysqldump -u" $4 " -p" $5 " -h" $6 " " $8 " --opt --single-transaction --skip-add-locks | mysql -u" $4 " -p" $5 " -h" $6 " --max_allowed_packet=32M " $8"_"branch_name}' ) || echo 'DB cloning failed with URL! Please check credentials' ; exit 1;
       fi
   only:
