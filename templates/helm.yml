@@ -1,5 +1,5 @@
 .helm:
-  image: jobtomelabs/helm-sops:v3.1.1
+  image: jobtomelabs/helm-sops:v3.2.0
 
 .helm:deploy:
   extends: .helm
