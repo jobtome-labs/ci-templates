@@ -147,5 +147,5 @@ stop:quality:
         fi
       else
         echo $URL | awk -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "DROP DATABASE " "\x60" $8 "\x60"";" "\x27" }'
-        eval(echo $URL | awk -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "DROP DATABASE " "\x60" $8 "\x60"";" "\x27" }') || { echo 'DB deletion failed with URL! Please check credentials' ; exit 1; }
+         eval $( echo $URL | awk -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "DROP DATABASE " "\x60" $8 "\x60"";" "\x27" }' ) || { echo 'DB deletion failed with URL! Please check credentials' ; exit 1; }
       fi
