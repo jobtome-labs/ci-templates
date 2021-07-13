@@ -79,14 +79,14 @@ deploy:quality:helm:branches:
         done
         if [ -z "$(no_db)" ]; then
           DB_NAME_FEAT=$( echo $SECRET_YAML | base64 -d | grep DB_HOST | awk '{ print $2}' | base64 -d )
-          mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST -e "USE $DB_NAME" || echo 'DB login failed! Please check credentials' ; exit 1;
-          mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST -e "CREATE DATABASE $DB_NAME_FEAT;" || echo 'DB creation failed! Please check user permission, must have CREATE, REFERENCES and DROP' ; exit 1;
-          mysqldump -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST $DB_NAME --opt --single-transaction --skip-add-locks | mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST --max_allowed_packet=32M $DB_NAME_FEAT || echo 'DB cloning failed!' ; exit 1;
+          mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST -e "USE $DB_NAME" || { echo 'DB login failed! Please check credentials' ; exit 1; }
+          mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST -e "CREATE DATABASE $DB_NAME_FEAT;" || { echo 'DB creation failed! Please check user permission, must have CREATE, REFERENCES and DROP' ; exit 1; }
+          mysqldump -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST $DB_NAME --opt --single-transaction --skip-add-locks | mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST --max_allowed_packet=32M $DB_NAME_FEAT || { echo 'DB cloning failed!' ; exit 1; }
         fi
       else
         DB_NAME_FEAT=$( echo $URL_BRANCH | awk -F [\/:@?] '{print $8}')
         echo $URL | awk -v db_name_feat="$DB_NAME_FEAT" -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "CREATE DATABASE " "\x60" db_name_feat "\x60" "\x27" " ; mysqldump -u" $4 " -p" $5 " -h" $6 " " $8 " --opt --single-transaction --skip-add-locks | mysql -u" $4 " -p" $5 " -h" $6 " --max_allowed_packet=32M " db_name_feat}'
-        eval $( echo $URL | awk -v db_name_feat="$DB_NAME_FEAT" -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "CREATE DATABASE " "\x60" db_name_feat "\x60" "\x27" " ; mysqldump -u" $4 " -p" $5 " -h" $6 " " $8 " --opt --single-transaction --skip-add-locks | mysql -u" $4 " -p" $5 " -h" $6 " --max_allowed_packet=32M " db_name_feat}' ) || echo 'DB cloning failed with URL! Please check credentials' ; exit 1;
+        eval $( echo $URL | awk -v db_name_feat="$DB_NAME_FEAT" -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "CREATE DATABASE " "\x60" db_name_feat "\x60" "\x27" " ; mysqldump -u" $4 " -p" $5 " -h" $6 " " $8 " --opt --single-transaction --skip-add-locks | mysql -u" $4 " -p" $5 " -h" $6 " --max_allowed_packet=32M " db_name_feat}' ) || { echo 'DB cloning failed with URL! Please check credentials' ; exit 1; }
       fi
   only:
     - merge_requests
