@@ -1,5 +1,5 @@
 include:
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v2.29.5/kubernetes-task-quality.yml'
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v2.29.6/kubernetes-task-quality.yml'
 
 task:production:europe:
   extends: .task
