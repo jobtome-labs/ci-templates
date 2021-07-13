@@ -59,7 +59,6 @@ deploy:quality:helm:branches:
             exit 1
           fi
       done
-      
     - |
       # CLONE DB
       URL=$( echo $SECRET_YAML_QUALITY | base64 -d | grep DATABASE_URL | awk '{ print $2}' | base64 -d )
