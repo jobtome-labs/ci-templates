@@ -15,6 +15,11 @@ deploy:quality:helm:branches:
     APP_NAME: ${CI_COMMIT_REF_SLUG}
   before_script:
     - |
+      # we need SECRET_YAML_QUALITY to perform DB cloning (it contains quality DB name, SECRET_YAML should contain the new name)
+      if [ -n "${SECRET_YAML_QUALITY}" ]; then
+        export SECRET_YAML_QUALITY=${SECRET_YAML_QUALITY}
+      fi      
+    - |
       # use a specific CI/CD variable if SECRET_BRANCH is specified in gitlab-ci
       if [ -n "${SECRET_BRANCH}" ]; then
         export SECRET_YAML=${!SECRET_BRANCH}
@@ -57,13 +62,14 @@ deploy:quality:helm:branches:
       
     - |
       # CLONE DB
-      URL=$( echo $SECRET_YAML | base64 -d | grep DATABASE_URL | awk '{ print $2}' | base64 -d )
+      URL=$( echo $SECRET_YAML_QUALITY | base64 -d | grep DATABASE_URL | awk '{ print $2}' | base64 -d )
+      URL_BRANCH=$( echo $SECRET_YAML | base64 -d | grep DATABASE_URL | awk '{ print $2}' | base64 -d )
       echo "${URL}"
       if [ -z "${URL}" ]; then
-        DB_USERNAME=$( echo $SECRET_YAML | base64 -d | grep DB_USERNAME | awk '{ print $2}' | base64 -d )
-        DB_PASSWORD=$( echo $SECRET_YAML | base64 -d | grep DB_PASSWORD | awk '{ print $2}' | base64 -d )
-        DB_HOST=$( echo $SECRET_YAML | base64 -d | grep DB_HOST | awk '{ print $2}' | base64 -d )
-        DB_NAME=$( echo $SECRET_YAML | base64 -d | grep DB_HOST | awk '{ print $2}' | base64 -d )
+        DB_USERNAME=$( echo $SECRET_YAML_QUALITY | base64 -d | grep DB_USERNAME | awk '{ print $2}' | base64 -d )
+        DB_PASSWORD=$( echo $SECRET_YAML_QUALITY | base64 -d | grep DB_PASSWORD | awk '{ print $2}' | base64 -d )
+        DB_HOST=$( echo $SECRET_YAML_QUALITY | base64 -d | grep DB_HOST | awk '{ print $2}' | base64 -d )
+        DB_NAME=$( echo $SECRET_YAML_QUALITY | base64 -d | grep DB_HOST | awk '{ print $2}' | base64 -d )
         for var in "DB_USERNAME" "DB_PASSWORD" "DB_HOST" "DB_NAME"; do
           if [ -z "${!var}" ]; then
             echo "Warning: Missing '${var}' variable or DATABASE_URL! Not proceeding with DB cloning"
@@ -72,13 +78,15 @@ deploy:quality:helm:branches:
           fi
         done
         if [ -z "$(no_db)" ]; then
+          DB_NAME_FEAT=$( echo $SECRET_YAML | base64 -d | grep DB_HOST | awk '{ print $2}' | base64 -d )
           mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST -e "USE $DB_NAME" || echo 'DB login failed! Please check credentials' ; exit 1;
-          mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST -e "CREATE DATABASE $DB_NAME_$APP_BRANCH_NAME;" || echo 'DB creation failed! Please check user permission, must have CREATE, REFERENCES and DROP' ; exit 1;
-          mysqldump -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST $DB_NAME --opt --single-transaction --skip-add-locks | mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST --max_allowed_packet=32M $DB_NAME_$APP_BRANCH_NAME || echo 'DB cloning failed!' ; exit 1;
+          mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST -e "CREATE DATABASE $DB_NAME_FEAT;" || echo 'DB creation failed! Please check user permission, must have CREATE, REFERENCES and DROP' ; exit 1;
+          mysqldump -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST $DB_NAME --opt --single-transaction --skip-add-locks | mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST --max_allowed_packet=32M $DB_NAME_FEAT || echo 'DB cloning failed!' ; exit 1;
         fi
       else
+        DB_NAME_FEAT=$( echo $URL_BRANCH | awk -F [\/:@?] '{print $8}')
         echo $URL | awk -v branch_name="$APP_BRANCH_NAME" -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "CREATE DATABASE " "\x60" $8"_"branch_name "\x60" "\x27" " ; mysqldump -u" $4 " -p" $5 " -h" $6 " " $8 " --opt --single-transaction --skip-add-locks | mysql -u" $4 " -p" $5 " -h" $6 " --max_allowed_packet=32M " $8"_"branch_name}'
-        eval $( echo $URL | awk -v branch_name="$APP_BRANCH_NAME" -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "CREATE DATABASE " "\x60" $8"_"branch_name "\x60" "\x27" " ; mysqldump -u" $4 " -p" $5 " -h" $6 " " $8 " --opt --single-transaction --skip-add-locks | mysql -u" $4 " -p" $5 " -h" $6 " --max_allowed_packet=32M " $8"_"branch_name}' ) || echo 'DB cloning failed with URL! Please check credentials' ; exit 1;
+        eval $( echo $URL | awk -v db_name_feat="$DB_NAME_FEAT" -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "CREATE DATABASE " "\x60" db_name_feat "\x60" "\x27" " ; mysqldump -u" $4 " -p" $5 " -h" $6 " " $8 " --opt --single-transaction --skip-add-locks | mysql -u" $4 " -p" $5 " -h" $6 " --max_allowed_packet=32M " db_name_feat}' ) || echo 'DB cloning failed with URL! Please check credentials' ; exit 1;
       fi
   only:
     - merge_requests
@@ -98,11 +106,19 @@ stop:quality:
     GOOGLE_KEY: ${GOOGLE_KEY_QUALITY}
     CLUSTER_NAME: ${CLUSTER_NAME_QUALITY}
     CLUSTER_ZONE: ${CLUSTER_ZONE_QUALITY}
-    SECRET_YAML: ${SECRET_YAML_QUALITY}
+    #SECRET_YAML: ${SECRET_YAML_QUALITY}
     NAMESPACE: ${NAMESPACE_QUALITY}
     ENVIRONMENT: feature
     APP_NAME: ${CI_COMMIT_REF_SLUG}
   before_script:
+    - |
+      # use a specific CI/CD variable if SECRET_BRANCH is specified in gitlab-ci
+      if [ -n "${SECRET_BRANCH}" ]; then
+        export SECRET_YAML=${!SECRET_BRANCH}
+      # otherwise, use default SECRET_YAML_FEATURE CI/CD variable
+      else
+        export SECRET_YAML=${SECRET_YAML_FEATURE}
+      fi
     - |
       # CHECK VARIABLES PHASE
       for var in "GOOGLE_KEY_QUALITY" "CLUSTER_NAME_QUALITY" "CLUSTER_ZONE_QUALITY" "NAMESPACE_QUALITY"; do
@@ -112,7 +128,7 @@ stop:quality:
           fi
       done
     - |
-      # CLONE DB
+      # REMOVE DB
       URL=$( echo $SECRET_YAML | base64 -d | grep DATABASE_URL | awk '{ print $2}' | base64 -d )
       if [ -z "${URL}" ]; then
         DB_USERNAME=$( echo $SECRET_YAML | base64 -d | grep DB_USERNAME | awk '{ print $2}' | base64 -d )
@@ -127,9 +143,9 @@ stop:quality:
           fi
         done
         if [ -z "$(no_db)" ]; then
-          mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST -e "USE $DB_NAME" || echo 'DB login failed! Please check credentials' ; exit 1;
-          mysql -u$DB_USERNAME -p$DB_PASSWORD -hDBHOST -e "DROP DATABASE $DB_NAME_$APP_BRANCH_NAME;" || echo 'DB deletion failed! Please check user permission, must have CREATE, REFERENCES and DROP' ; exit 1;
+          mysql -u$DB_USERNAME -p$DB_PASSWORD -hDB_HOST -e "USE $DB_NAME" || echo 'DB login failed! Please check credentials' ; exit 1;
+          mysql -u$DB_USERNAME -p$DB_PASSWORD -hDB_HOST -e "DROP DATABASE $DB_NAME;" || echo 'DB deletion failed! Please check user permission, must have CREATE, REFERENCES and DROP' ; exit 1;
         fi
       else
-        eval(echo $URL | awk -v branch_name="$APP_BRANCH_NAME" -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "DROP DATABASE " "\x60" $8"_"branch_name "\x60" "\x27" ";') || echo 'DB deletion failed with URL! Please check credentials' ; exit 1;
+        eval(echo $URL_BRANCH | awk -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "DROP DATABASE " "\x60" $8 "\x60"";" "\x27" }') || echo 'DB deletion failed with URL! Please check credentials' ; exit 1;
       fi
