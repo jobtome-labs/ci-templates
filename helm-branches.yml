@@ -141,8 +141,8 @@ stop:quality:
           fi
         done
         if [ -z "$(no_db)" ]; then
-          mysql -u$DB_USERNAME -p$DB_PASSWORD -hDB_HOST -e "USE $DB_NAME" || { echo 'DB login failed! Please check credentials' ; exit 1; }
-          mysql -u$DB_USERNAME -p$DB_PASSWORD -hDB_HOST -e "DROP DATABASE $DB_NAME;" || { echo 'DB deletion failed! Please check user permission, must have CREATE, REFERENCES and DROP' ; exit 1; }
+          mysql -u$DB_USERNAME -p$DB_PASSWORD -h$DB_HOST -e "USE $DB_NAME" || { echo 'DB login failed! Please check credentials' ; exit 1; }
+          mysql -u$DB_USERNAME -p$DB_PASSWORD -h$DB_HOST -e "DROP DATABASE $DB_NAME;" || { echo 'DB deletion failed! Please check user permission, must have CREATE, REFERENCES and DROP' ; exit 1; }
         fi
       else
         echo $URL | awk -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "DROP DATABASE " "\x60" $8 "\x60"";" "\x27" }'
