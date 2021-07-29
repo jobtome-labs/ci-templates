@@ -61,8 +61,11 @@ deploy:quality:helm:branches:
       done
     - |
       # CLONE DB
+      echo "Cloning db"
       URL=$( echo $SECRET_YAML_QUALITY | base64 -d | grep DATABASE_URL | awk '{ print $2}' | base64 -d )
+      echo "URL=${URL}"
       URL_BRANCH=$( echo $SECRET_YAML | base64 -d | grep DATABASE_URL | awk '{ print $2}' | base64 -d )
+      echo "URL_BRANCH=${URL_BRANCH}"
       if [ -z "${URL}" ]; then
         echo "empty \$URL"
         DB_USERNAME=$( echo $SECRET_YAML_QUALITY | base64 -d | grep DB_USERNAME | awk '{ print $2}' | base64 -d )
