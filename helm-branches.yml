@@ -70,10 +70,12 @@ deploy:quality:helm:branches:
       echo "URL_BRANCH=${URL_BRANCH}"
       if [ -z "${URL}" ]; then
         echo "empty \$URL"
+        set +e
         DB_USERNAME=$( echo $SECRET_YAML_QUALITY | base64 -d | grep DB_USERNAME | awk '{ print $2}' | base64 -d )
         DB_PASSWORD=$( echo $SECRET_YAML_QUALITY | base64 -d | grep DB_PASSWORD | awk '{ print $2}' | base64 -d )
         DB_HOST=$( echo $SECRET_YAML_QUALITY | base64 -d | grep DB_HOST | awk '{ print $2}' | base64 -d )
         DB_NAME=$( echo $SECRET_YAML_QUALITY | base64 -d | grep DB_HOST | awk '{ print $2}' | base64 -d )
+        set -e
         for var in "DB_USERNAME" "DB_PASSWORD" "DB_HOST" "DB_NAME"; do
           if [ -z "${!var}" ]; then
             echo "Warning: Missing '${var}' variable or DATABASE_URL! Not proceeding with DB cloning"
