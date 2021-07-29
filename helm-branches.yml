@@ -137,13 +137,17 @@ stop:quality:
       done
     - |
       # REMOVE DB
+      set +e
       URL=$( echo $SECRET_YAML | base64 -d | grep DATABASE_URL | awk '{ print $2}' | base64 -d )
-      echo $URL
+      set -e
+      echo "URL=${URL}"
       if [ -z "${URL}" ]; then
+        set +e
         DB_USERNAME=$( echo $SECRET_YAML | base64 -d | grep DB_USERNAME | awk '{ print $2}' | base64 -d )
         DB_PASSWORD=$( echo $SECRET_YAML | base64 -d | grep DB_PASSWORD | awk '{ print $2}' | base64 -d )
         DB_HOST=$( echo $SECRET_YAML | base64 -d | grep DB_HOST | awk '{ print $2}' | base64 -d )
         DB_NAME=$( echo $SECRET_YAML | base64 -d | grep DB_HOST | awk '{ print $2}' | base64 -d )
+        set -e
         for var in "DB_USERNAME" "DB_PASSWORD" "DB_HOST" "DB_NAME"; do
           if [ -z "${!var}" ]; then
             echo "Warning: Missing '${var}' variable or DATABASE_URL! Not proceeding with DB deletion"
