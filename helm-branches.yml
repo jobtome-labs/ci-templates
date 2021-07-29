@@ -75,11 +75,13 @@ deploy:quality:helm:branches:
             break
           fi
         done
-        if [ -z "$(no_db)" ]; then
+        if [ -z "${no_db}" ]; then
           DB_NAME_FEAT=$( echo $SECRET_YAML | base64 -d | grep DB_HOST | awk '{ print $2}' | base64 -d )
           mysql -u$DB_USERNAME -p$DB_PASSWORD -h$DB_HOST -e "USE $DB_NAME" || { echo 'DB login failed! Please check credentials' ; exit 1; }
           mysql -u$DB_USERNAME -p$DB_PASSWORD -h$DB_HOST -e "CREATE DATABASE $DB_NAME_FEAT;" || { echo 'DB creation failed! Please check user permission, must have CREATE, REFERENCES and DROP' ; exit 1; }
           mysqldump -u$DB_USERNAME -p$DB_PASSWORD -h$DB_HOST $DB_NAME --opt --single-transaction --skip-add-locks | mysql -u$DB_USERNAME -p$DB_PASSWORD -h$DB_HOST --max_allowed_packet=32M $DB_NAME_FEAT || { echo 'DB cloning failed!' ; exit 1; }
+        else
+          echo "no_db option was set"
         fi
       else
         DB_NAME_FEAT=$( echo $URL_BRANCH | awk -F [\/:@?] '{print $8}')
@@ -140,11 +142,13 @@ stop:quality:
             break
           fi
         done
-        if [ -z "$(no_db)" ]; then
+        if [ -z "${no_db}" ]; then
           mysql -u$DB_USERNAME -p$DB_PASSWORD -h$DB_HOST -e "USE $DB_NAME" || { echo 'DB login failed! Please check credentials' ; exit 1; }
           mysql -u$DB_USERNAME -p$DB_PASSWORD -h$DB_HOST -e "DROP DATABASE $DB_NAME;" || { echo 'DB deletion failed! Please check user permission, must have CREATE, REFERENCES and DROP' ; exit 1; }
+        else
+          echo "no_db option was set"
         fi
       else
         echo $URL | awk -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "DROP DATABASE " "\x60" $8 "\x60"";" "\x27" }'
-         eval $( echo $URL | awk -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "DROP DATABASE " "\x60" $8 "\x60"";" "\x27" }' ) || { echo 'DB deletion failed with URL! Please check credentials' ; exit 1; }
+        eval $( echo $URL | awk -F [\/:@?] '{print "mysql -u" $4 " -p" $5 " -h" $6 " -e" " \x27" "DROP DATABASE " "\x60" $8 "\x60"";" "\x27" }' ) || { echo 'DB deletion failed with URL! Please check credentials' ; exit 1; }
       fi
