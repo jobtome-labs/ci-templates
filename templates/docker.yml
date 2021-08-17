@@ -6,8 +6,10 @@ variables:
   DOCKER_BUILDKIT: 1
   COMPOSE_DOCKER_CLI_BUILD: 1
 
-
-.docker:build:multi:
+# This is a base template to build docker multi-stage images.
+# It doesn't include `only` section to allow customizing it using `rules` (a more generic and powerful way to define conditional runs)
+# See this: https://docs.gitlab.com/ee/ci/yaml/#rules
+.docker:build:multi:base:
   extends: .docker
   stage: build
   script:
@@ -54,6 +56,12 @@ variables:
     - docker build --target $BUILD_TARGET $CACHE_FROM_OPTION -t $DOCKER_IMAGE_NAME -t $DOCKER_IMAGE_NAME_LATEST .
     - docker push $DOCKER_IMAGE_NAME
     - docker push $DOCKER_IMAGE_NAME_LATEST
+
+# This is a template to build docker multi-stage images with the `only` section defined.
+# It is here for use 
+.docker:build:multi:
+  extends: .docker:build:multi:base
+  stage: build
   only:
     - merge_requests
     - tags
