@@ -340,6 +340,7 @@ stop:quality:
 
     - |
       # Clean up gitlab docker registry
+      # TODO: switch to Gitlab API instead
       TAGS_FILENAME=tags.txt
       echo running /usr/local/bin/reg tags --auth-url $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $DOCKER_IMAGE_BASE
       /usr/local/bin/reg tags --auth-url $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $DOCKER_IMAGE_BASE | tee $TAGS_FILENAME
