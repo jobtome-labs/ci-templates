@@ -295,21 +295,12 @@ stop:quality:
     action: stop
   stage: stop
   variables:
-    GIT_STRATEGY: none
-    DOCKER_IMAGE_BASE: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
-    REG_SHA256: ade837fc5224acd8c34732bf54a94f579b47851cc6a7fd5899a98386b782e228
-    REG_VERSION: 0.16.1
     GOOGLE_KEY: ${GOOGLE_KEY_QUALITY}
     CLUSTER_NAME: ${CLUSTER_NAME_QUALITY}
     CLUSTER_ZONE: ${CLUSTER_ZONE_QUALITY}
     NAMESPACE: ${NAMESPACE_QUALITY}
     ENVIRONMENT: feature
     CI_COMMIT_TAG: ${CI_COMMIT_SHORT_SHA}
-  before_script:
-    - apk add --no-cache curl
-    - curl --fail --show-error --location "https://github.com/genuinetools/reg/releases/download/v$REG_VERSION/reg-linux-amd64" --output /usr/local/bin/reg
-    - echo "$REG_SHA256  /usr/local/bin/reg" | sha256sum -c -
-    - chmod a+x /usr/local/bin/reg
   script:
     - *dbcheckvars
     - *dbactivate
@@ -337,25 +328,6 @@ stop:quality:
       echo
       echo "-> Uninstall completed successfully"
       echo
-
-    - |
-      # Clean up gitlab docker registry
-      # TODO: switch to Gitlab API instead
-      TAGS_FILENAME=tags.txt
-      echo running /usr/local/bin/reg tags --auth-url $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $DOCKER_IMAGE_BASE
-      /usr/local/bin/reg tags --auth-url $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $DOCKER_IMAGE_BASE | tee $TAGS_FILENAME
-      while read tag
-      do
-          if [ ! -z "$tag" ]; then
-              case "$tag" in
-                  latest*) echo skipping alias $tag ;;
-                  *)
-                     echo running /usr/local/bin/reg rm --auth-url $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $DOCKER_IMAGE_BASE:$tag
-                     /usr/local/bin/reg rm --auth-url $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $DOCKER_IMAGE_BASE:$tag
-                  ;;
-              esac
-          fi
-      done < $TAGS_FILENAME
   rules:
     - if: $CI_MERGE_REQUEST_ID && $CI_COMMIT_REF_NAME =~ /^feat/
       when: manual
