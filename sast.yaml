@@ -1,0 +1,45 @@
+include:
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.5.6/templates/sast.yml"
+
+sast:
+  extends: .sast
+  image: jobtomelabs/dind-bash:20.10
+  variables:
+    DOCKER_DRIVER: overlay2
+  before_script:
+    - echo "Wait for Docker daemon at tcp://localhost:2375"
+    - while ! nc -z localhost 2375; do sleep 0.1; done
+  script:
+    - |
+      if [ ! -z "$SAST_EXTRA_PATH" ]; then
+          SAST_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE/$SAST_EXTRA_PATH
+          echo "Repo path overridden"
+      else
+          SAST_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE
+          echo "Repo path not overridden"
+      fi
+    - |
+      if [ ! -z "$CI_COMMIT_TAG" ]; then
+          SAST_APPLICATION_TAG=$CI_COMMIT_TAG
+      else
+          SAST_APPLICATION_TAG=$CI_COMMIT_SHORT_SHA
+      fi
+    - docker run -d --name db arminc/clair-db:latest
+    - docker run -p 6060:6060 --link db:postgres -d --name clair --restart on-failure arminc/clair-local-scan:v2.0.1
+    - apk add -U wget ca-certificates
+    - echo -n "${CI_REGISTRY_PASSWORD}" | docker login -u "${CI_REGISTRY_USER}" --password-stdin "${CI_REGISTRY}"
+    - docker pull ${SAST_APPLICATION_REPOSITORY}:${SAST_APPLICATION_TAG}
+    - wget https://github.com/arminc/clair-scanner/releases/download/v8/clair-scanner_linux_amd64
+    - mv clair-scanner_linux_amd64 clair-scanner
+    - chmod +x clair-scanner
+    - touch clair-whitelist.yml
+    - while( ! wget -q -O /dev/null http://docker:6060/v1/namespaces ) ; do sleep 1 ; done
+    - retries=0
+    - echo "Waiting for clair daemon to start"
+    - while( ! wget -T 10 -q -O /dev/null http://docker:6060/v1/namespaces ) ; do sleep 1 ; echo -n "." ; if [ $retries -eq 10 ] ; then echo " Timeout, aborting." ; exit 1 ; fi ; retries=$(($retries+1)) ; done
+    - ./clair-scanner -c http://docker:6060 --ip $(hostname -i) -r gl-container-scanning-report.json -l clair.log -w clair-whitelist.yml ${SAST_APPLICATION_REPOSITORY}:${SAST_APPLICATION_TAG} || true
+    - grep -cE 'Image \[.*\] not vulnerable' >/dev/null 2>&1 clair.log
+  artifacts:
+    reports:
+      container_scanning: gl-container-scanning-report.json
+ 

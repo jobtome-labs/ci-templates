@@ -1,5 +1,5 @@
 include:
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.5.5/serverless-quality.yml'
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.5.6/serverless-quality.yml'
 
 # EUROPE
 deploy:production:europe:

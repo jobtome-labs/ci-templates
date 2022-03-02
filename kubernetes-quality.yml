@@ -1,6 +1,6 @@
 include:
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.5.5/docker.yml'
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.5.5/templates/kubernetes.yml'
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.5.6/docker.yml'
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.5.6/templates/kubernetes.yml'
 
 deploy:quality:image:
   extends: .deploy:image

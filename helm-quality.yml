@@ -1,6 +1,6 @@
 include:
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.5.5/docker.yml'
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.5.5/templates/helm.yml'
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.5.6/docker.yml'
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.5.6/templates/helm.yml'
 
 deploy:quality:helm:
   variables:

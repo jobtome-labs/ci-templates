@@ -1,5 +1,5 @@
 include:
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.5.5/kubernetes-quality.yml'
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.5.6/kubernetes-quality.yml'
 
 # EUROPE
 deploy:production:europe:image:
