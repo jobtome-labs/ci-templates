@@ -1,7 +1,7 @@
 # The following is commented because it is already included by terraform.yml
 # and most often you want to include terraform along with security
 # include:
-#   - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.5.6/templates/terraform.yml'
+#   - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.5.7/templates/terraform.yml'
 
 test:terraform-security:
   extends: .terraform-security
