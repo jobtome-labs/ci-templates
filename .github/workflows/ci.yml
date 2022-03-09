@@ -1,0 +1,35 @@
+---
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "**.yml"
+      - "**.yaml"
+      - "!.github/**"
+
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "**.yml"
+      - "**.yaml"
+      - "!.github/**"
+
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Scan and Validate Include Statements
+        run: |
+          python .github/resources/include_scanner.py scan --current-tag "$(git describe --tags --abbrev=0)" -v .
