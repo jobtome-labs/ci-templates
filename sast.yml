@@ -1,5 +1,5 @@
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.5.8/templates/sast.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.6.0/templates/sast.yml"
 
 sast:
   extends: .sast
@@ -42,4 +42,3 @@ sast:
   artifacts:
     reports:
       container_scanning: gl-container-scanning-report.json
- 
