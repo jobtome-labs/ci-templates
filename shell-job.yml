@@ -1,6 +1,6 @@
 include:
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.9.0/lint-shell.yml'
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.9.0/templates/terraform.yml'
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.10.0/lint-shell.yml'
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.10.0/templates/terraform.yml'
 
 job:shell:
   stage: deploy

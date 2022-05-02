@@ -2,10 +2,10 @@
 include:
   - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.10.0/templates/test-unit.yml"
 
-test:unit:go:
+test:unit:js:
   extends: .test:unit
 
-  image: "${CI_REGISTRY_IMAGE}/${APP_TEST_IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}"
+  image: "${CI_REGISTRY_IMAGE}/${APP_UNIT_TEST_IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}"
 
   script:
-    - go test ./...
+    - cd /app/src && pnpm run test
