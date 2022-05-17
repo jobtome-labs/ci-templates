@@ -1,69 +1,12 @@
-.sentry:
-  image: jobtomelabs/sentry-cli-bash:v1.1.0
-  only:
-    - /^v.+$/i
-    - master
-    - merge_requests
-  allow_failure: true
-  when: on_success
-  script:
-    - &check-set-variables |
-      # CHECK VARIABLES PHASE
-      for var in "SENTRY_AUTH_TOKEN" "SENTRY_URL" "SENTRY_ORG" "SENTRY_PROJECT"; do
-          if [ -z "${!var}" ]; then
-            echo "Missing '${var}' variable!"
-            exit 1
-          fi
-      done
-
-      ENVIRONMENT="production"
-      if [ -z "${CI_COMMIT_TAG}" ]; then
-        CI_COMMIT_TAG=$(git describe --tags --always)
-        ENVIRONMENT="quality"
-      fi
-
-      sentry-cli info
+---
+include:
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/feat/add-fullstack-deployment-templates/templates/sentry.yml"
 
 sentry:release:set:
-  extends: .sentry
-  stage: build
-  script:
-    - *check-set-variables
-    - |
-      #SET NEW RELEASE
-
-      sentry-cli releases new "${CI_COMMIT_TAG}"
-
-      if [ -n "${FEAT_SENTRY_SETCOMMITS}" ]; then
-        echo
-        echo "-> [INFO] variable 'FEAT_SENTRY_SETCOMMITS' for experimental feature enabled!"
-        echo
-        sentry-cli releases set-commits "${CI_COMMIT_TAG}" --auto
-      fi
-
-      echo "Sentry release set to ${CI_COMMIT_TAG}!"
-
+  extends: .sentry:release:set
 
 sentry:release:finalize:
-  extends: .sentry
-  stage: deploy
-  script:
-    - *check-set-variables
-    - |
-      #FINALISE RELEASE
-
-      sentry-cli releases finalize "${CI_COMMIT_TAG}"
-
-      echo "Sentry release finalized to ${CI_COMMIT_TAG}!"
+  extends: .sentry:release:finalize
 
 sentry:notify:
-  extends: .sentry
-  stage: notify
-  script:
-    - *check-set-variables
-    - |
-      #SET NEW DEPLOY
-
-      sentry-cli releases deploys "${CI_COMMIT_TAG}" new -e "${ENVIRONMENT}"
-
-      echo "Sentry was notified that release ${CI_COMMIT_TAG} was set for ${ENVIRONMENT}!"
+  extends: .sentry:notify
