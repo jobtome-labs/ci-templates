@@ -1,0 +1,12 @@
+doc:
+  stage: doc
+  image: curlimages/curl
+  script:
+    - curl -L https://github.com/Kerwood/confluence-updater/releases/download/v1.1.1/confluence-updater-x86_64-unknown-linux-musl -o confluence-updater
+    - chmod +x confluence-updater
+    - ./confluence-updater update -u $CU_USER -s $CU_SECRET --fqdn $CU_FQDN
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      changes:
+        - README.md
+      when: on_success
