@@ -1,0 +1,10 @@
+confluence-sync:
+  stage: confluence-sync
+  image: registry.jobtome.io/sre/platform/dockerfiles/confluence-updater
+  script:
+    - /tmp/confluence-updater update -u $CU_USER -s $CU_SECRET --fqdn $CU_FQDN
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      changes:
+        - README.md
+      when: on_success
