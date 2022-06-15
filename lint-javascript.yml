@@ -1,13 +1,13 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.11.0/templates/lint.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.12.0/templates/lint.yml"
 
 lint:eslint:
   extends: .lint
 
   image: "${CI_REGISTRY_IMAGE}/${APP_ESLINT_IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}"
 
-  script: 
+  script:
     - cd /app/src && pnpm run eslint-check
 
 lint:prettier:
@@ -15,5 +15,5 @@ lint:prettier:
 
   image: "${CI_REGISTRY_IMAGE}/${APP_PRETTIER_IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}"
 
-  script: 
+  script:
     - cd /app/src && pnpm run prettier-check
