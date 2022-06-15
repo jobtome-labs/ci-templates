@@ -2,10 +2,13 @@
 include:
   - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.12.0/templates/lint.yml"
 
-lint:go:
+lint:
   extends: .lint
 
   image: "${CI_REGISTRY_IMAGE}/${APP_LINT_IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}"
 
+  variables:
+    GIT_STRATEGY: none
+
   script:
-    - golangci-lint --verbose --timeout=5m run ./...
+    - echo "<RUN_LINTING_COMMAND>"

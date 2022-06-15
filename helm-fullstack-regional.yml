@@ -1,0 +1,177 @@
+---
+include:
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.12.0/helm-fullstack-quality.yml"
+
+deploy:helm:api:production:
+  extends: .deploy:production:helm
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_API_PRODUCTION}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION}
+    DOMAIN: ${DOMAIN_API_PRODUCTION}
+    SECRET_YAML: ${SECRET_YAML_API_PRODUCTION}
+    NAMESPACE: ${NAMESPACE_API_PRODUCTION}
+    APP_NAME: ${API_APP_NAME}
+    PART_OF: ${API_PART_OF}
+    ENVIRONMENT: production
+    ENVIRONMENT_NAME: "production/api"
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_API_PRODUCTION" "CLUSTER_NAME_PRODUCTION" "CLUSTER_ZONE_PRODUCTION" "NAMESPACE_API_PRODUCTION" "DOMAIN_API_PRODUCTION"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+deploy:helm:web:production:
+  extends: .deploy:production:helm
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_WEB_PRODUCTION}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION}
+    DOMAIN: ${DOMAIN_WEB_PRODUCTION}
+    SECRET_YAML: ${SECRET_YAML_WEB_PRODUCTION}
+    NAMESPACE: ${NAMESPACE_WEB_PRODUCTION}
+    APP_NAME: ${WEB_APP_NAME}
+    PART_OF: ${WEB_PART_OF}
+    ENVIRONMENT: production
+    ENVIRONMENT_NAME: "production/web"
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_WEB_PRODUCTION" "CLUSTER_NAME_PRODUCTION" "CLUSTER_ZONE_PRODUCTION" "NAMESPACE_WEB_PRODUCTION" "DOMAIN_WEB_PRODUCTION"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+verify:api:production:
+  extends: .verify
+
+  stage: verify
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_API_PRODUCTION}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION}
+    NAMESPACE: ${NAMESPACE_API_PRODUCTION}
+    APP_NAME: ${API_APP_NAME}
+    PART_OF: ${API_PART_OF}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_API_PRODUCTION" "CLUSTER_NAME_PRODUCTION" "CLUSTER_ZONE_PRODUCTION" "NAMESPACE_API_PRODUCTION"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  only:
+    - /^v.+$/i
+  except:
+    - branches
+
+verify:web:production:
+  extends: .verify
+
+  stage: verify
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_WEB_PRODUCTION}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION}
+    NAMESPACE: ${NAMESPACE_WEB_PRODUCTION}
+    APP_NAME: ${WEB_APP_NAME}
+    PART_OF: ${WEB_PART_OF}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_WEB_PRODUCTION" "CLUSTER_NAME_PRODUCTION" "CLUSTER_ZONE_PRODUCTION" "NAMESPACE_WEB_PRODUCTION"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  only:
+    - /^v.+$/i
+  except:
+    - branches
+
+helm:diff:api:production:
+  extends: .helm:diff
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_API_PRODUCTION}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION}
+    DOMAIN: ${DOMAIN_API_PRODUCTION}
+    SECRET_YAML: ${SECRET_YAML_API_PRODUCTION}
+    NAMESPACE: ${NAMESPACE_API_PRODUCTION}
+    APP_NAME: ${API_APP_NAME}
+    PART_OF: ${API_PART_OF}
+    ENVIRONMENT: production
+    ENVIRONMENT_NAME: "production/api"
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_API_PRODUCTION" "CLUSTER_NAME_PRODUCTION" "CLUSTER_ZONE_PRODUCTION" "NAMESPACE_API_PRODUCTION"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  rules:
+    - if: '$ENABLE_HELM_DIFF == "true" && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+
+helm:diff:web:production:
+  extends: .helm:diff
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_WEB_PRODUCTION}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION}
+    DOMAIN: ${DOMAIN_WEB_PRODUCTION}
+    SECRET_YAML: ${SECRET_YAML_WEB_PRODUCTION}
+    NAMESPACE: ${NAMESPACE_WEB_PRODUCTION}
+    APP_NAME: ${WEB_APP_NAME}
+    PART_OF: ${WEB_PART_OF}
+    ENVIRONMENT: production
+    ENVIRONMENT_NAME: "production/web"
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_WEB_PRODUCTION" "CLUSTER_NAME_PRODUCTION" "CLUSTER_ZONE_PRODUCTION" "NAMESPACE_WEB_PRODUCTION"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  rules:
+    - if: '$ENABLE_HELM_DIFF == "true" && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'

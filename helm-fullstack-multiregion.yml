@@ -1,0 +1,543 @@
+---
+include:
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.12.0/helm-fullstack-quality.yml"
+
+# EUROPE
+
+deploy:helm:api:production:europe:
+  extends: .deploy:production:helm
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_API_PRODUCTION_EUROPE}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION_EUROPE}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION_EUROPE}
+    DOMAIN: ${DOMAIN_API_PRODUCTION_EUROPE}
+    SECRET_YAML: ${SECRET_YAML_API_PRODUCTION_EUROPE}
+    NAMESPACE: ${NAMESPACE_API_PRODUCTION_EUROPE}
+    APP_NAME: ${API_APP_NAME}
+    PART_OF: ${API_PART_OF}
+    ENVIRONMENT: production
+    ENVIRONMENT_NAME: "production-europe/api"
+    ENVIRONMENT_PATH: ${ENVIRONMENT_PATH_API_EUROPE}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_API_PRODUCTION_EUROPE" "CLUSTER_NAME_PRODUCTION_EUROPE" "CLUSTER_ZONE_PRODUCTION_EUROPE" "NAMESPACE_API_PRODUCTION_EUROPE" "DOMAIN_API_PRODUCTION_EUROPE"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+deploy:helm:web:production:europe:
+  extends: .deploy:production:helm
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_WEB_PRODUCTION_EUROPE}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION_EUROPE}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION_EUROPE}
+    DOMAIN: ${DOMAIN_WEB_PRODUCTION_EUROPE}
+    SECRET_YAML: ${SECRET_YAML_WEB_PRODUCTION_EUROPE}
+    NAMESPACE: ${NAMESPACE_WEB_PRODUCTION_EUROPE}
+    APP_NAME: ${WEB_APP_NAME}
+    PART_OF: ${WEB_PART_OF}
+    ENVIRONMENT: production
+    ENVIRONMENT_NAME: "production-europe/web"
+    ENVIRONMENT_PATH: ${ENVIRONMENT_PATH_WEB_EUROPE}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_WEB_PRODUCTION_EUROPE" "CLUSTER_NAME_PRODUCTION_EUROPE" "CLUSTER_ZONE_PRODUCTION_EUROPE" "NAMESPACE_WEB_PRODUCTION_EUROPE" "DOMAIN_WEB_PRODUCTION_EUROPE"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+verify:api:production:europe:
+  extends: .verify
+
+  stage: verify
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_API_PRODUCTION_EUROPE}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION_EUROPE}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION_EUROPE}
+    NAMESPACE: ${NAMESPACE_API_PRODUCTION_EUROPE}
+    APP_NAME: ${API_APP_NAME}
+    PART_OF: ${API_PART_OF}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_API_PRODUCTION_EUROPE" "CLUSTER_NAME_PRODUCTION_EUROPE" "CLUSTER_ZONE_PRODUCTION_EUROPE" "NAMESPACE_API_PRODUCTION_EUROPE"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  only:
+    - /^v.+$/i
+  except:
+    - branches
+
+verify:web:production:europe:
+  extends: .verify
+
+  stage: verify
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_WEB_PRODUCTION_EUROPE}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION_EUROPE}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION_EUROPE}
+    NAMESPACE: ${NAMESPACE_WEB_PRODUCTION_EUROPE}
+    APP_NAME: ${WEB_APP_NAME}
+    PART_OF: ${WEB_PART_OF}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_WEB_PRODUCTION_EUROPE" "CLUSTER_NAME_PRODUCTION_EUROPE" "CLUSTER_ZONE_PRODUCTION_EUROPE" "NAMESPACE_WEB_PRODUCTION_EUROPE"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  only:
+    - /^v.+$/i
+  except:
+    - branches
+
+helm:diff:api:production:europe:
+  extends: .helm:diff
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_API_PRODUCTION_EUROPE}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION_EUROPE}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION_EUROPE}
+    DOMAIN: ${DOMAIN_API_PRODUCTION_EUROPE}
+    SECRET_YAML: ${SECRET_YAML_API_PRODUCTION_EUROPE}
+    NAMESPACE: ${NAMESPACE_API_PRODUCTION_EUROPE}
+    APP_NAME: ${API_APP_NAME}
+    PART_OF: ${API_PART_OF}
+    ENVIRONMENT: production
+    ENVIRONMENT_NAME: "production-europe/api"
+    ENVIRONMENT_PATH: ${ENVIRONMENT_PATH_API_EUROPE}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_API_PRODUCTION_EUROPE" "CLUSTER_NAME_PRODUCTION_EUROPE" "CLUSTER_ZONE_PRODUCTION_EUROPE" "NAMESPACE_API_PRODUCTION_EUROPE"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  rules:
+    - if: '$ENABLE_HELM_DIFF == "true" && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+
+helm:diff:web:production:europe:
+  extends: .helm:diff
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_WEB_PRODUCTION_EUROPE}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION_EUROPE}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION_EUROPE}
+    DOMAIN: ${DOMAIN_WEB_PRODUCTION_EUROPE}
+    SECRET_YAML: ${SECRET_YAML_WEB_PRODUCTION_EUROPE}
+    NAMESPACE: ${NAMESPACE_WEB_PRODUCTION_EUROPE}
+    APP_NAME: ${WEB_APP_NAME}
+    PART_OF: ${WEB_PART_OF}
+    ENVIRONMENT: production
+    ENVIRONMENT_NAME: "production-europe/web"
+    ENVIRONMENT_PATH: ${ENVIRONMENT_PATH_WEB_EUROPE}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_WEB_PRODUCTION_EUROPE" "CLUSTER_NAME_PRODUCTION_EUROPE" "CLUSTER_ZONE_PRODUCTION_EUROPE" "NAMESPACE_WEB_PRODUCTION_EUROPE"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  rules:
+    - if: '$ENABLE_HELM_DIFF == "true" && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+
+# AMERICA
+
+deploy:helm:api:production:america:
+  extends: .deploy:production:helm
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_API_PRODUCTION_AMERICA}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION_AMERICA}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION_AMERICA}
+    DOMAIN: ${DOMAIN_API_PRODUCTION_AMERICA}
+    SECRET_YAML: ${SECRET_YAML_API_PRODUCTION_AMERICA}
+    NAMESPACE: ${NAMESPACE_API_PRODUCTION_AMERICA}
+    APP_NAME: ${API_APP_NAME}
+    PART_OF: ${API_PART_OF}
+    ENVIRONMENT: production
+    ENVIRONMENT_NAME: "production-america/api"
+    ENVIRONMENT_PATH: ${ENVIRONMENT_PATH_API_AMERICA}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_API_PRODUCTION_AMERICA" "CLUSTER_NAME_PRODUCTION_AMERICA" "CLUSTER_ZONE_PRODUCTION_AMERICA" "NAMESPACE_API_PRODUCTION_AMERICA" "DOMAIN_API_PRODUCTION_AMERICA"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+deploy:helm:web:production:america:
+  extends: .deploy:production:helm
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_WEB_PRODUCTION_AMERICA}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION_AMERICA}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION_AMERICA}
+    DOMAIN: ${DOMAIN_WEB_PRODUCTION_AMERICA}
+    SECRET_YAML: ${SECRET_YAML_WEB_PRODUCTION_AMERICA}
+    NAMESPACE: ${NAMESPACE_WEB_PRODUCTION_AMERICA}
+    APP_NAME: ${WEB_APP_NAME}
+    PART_OF: ${WEB_PART_OF}
+    ENVIRONMENT: production
+    ENVIRONMENT_NAME: "production-america/web"
+    ENVIRONMENT_PATH: ${ENVIRONMENT_PATH_WEB_AMERICA}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_WEB_PRODUCTION_AMERICA" "CLUSTER_NAME_PRODUCTION_AMERICA" "CLUSTER_ZONE_PRODUCTION_AMERICA" "NAMESPACE_WEB_PRODUCTION_AMERICA" "DOMAIN_WEB_PRODUCTION_AMERICA"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+verify:api:production:america:
+  extends: .verify
+
+  stage: verify
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_API_PRODUCTION_AMERICA}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION_AMERICA}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION_AMERICA}
+    NAMESPACE: ${NAMESPACE_API_PRODUCTION_AMERICA}
+    APP_NAME: ${API_APP_NAME}
+    PART_OF: ${API_PART_OF}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_API_PRODUCTION_AMERICA" "CLUSTER_NAME_PRODUCTION_AMERICA" "CLUSTER_ZONE_PRODUCTION_AMERICA" "NAMESPACE_API_PRODUCTION_AMERICA"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  only:
+    - /^v.+$/i
+  except:
+    - branches
+
+verify:web:production:america:
+  extends: .verify
+
+  stage: verify
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_WEB_PRODUCTION_AMERICA}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION_AMERICA}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION_AMERICA}
+    NAMESPACE: ${NAMESPACE_WEB_PRODUCTION_AMERICA}
+    APP_NAME: ${WEB_APP_NAME}
+    PART_OF: ${WEB_PART_OF}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_WEB_PRODUCTION_AMERICA" "CLUSTER_NAME_PRODUCTION_AMERICA" "CLUSTER_ZONE_PRODUCTION_AMERICA" "NAMESPACE_WEB_PRODUCTION_AMERICA"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  only:
+    - /^v.+$/i
+  except:
+    - branches
+
+helm:diff:api:production:america:
+  extends: .helm:diff
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_API_PRODUCTION_AMERICA}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION_AMERICA}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION_AMERICA}
+    DOMAIN: ${DOMAIN_API_PRODUCTION_AMERICA}
+    SECRET_YAML: ${SECRET_YAML_API_PRODUCTION_AMERICA}
+    NAMESPACE: ${NAMESPACE_API_PRODUCTION_AMERICA}
+    APP_NAME: ${API_APP_NAME}
+    PART_OF: ${API_PART_OF}
+    ENVIRONMENT: production
+    ENVIRONMENT_NAME: "production-america/api"
+    ENVIRONMENT_PATH: ${ENVIRONMENT_PATH_API_AMERICA}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_API_PRODUCTION_AMERICA" "CLUSTER_NAME_PRODUCTION_AMERICA" "CLUSTER_ZONE_PRODUCTION_AMERICA" "NAMESPACE_API_PRODUCTION_AMERICA"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  rules:
+    - if: '$ENABLE_HELM_DIFF == "true" && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+
+helm:diff:web:production:america:
+  extends: .helm:diff
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_WEB_PRODUCTION_AMERICA}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION_AMERICA}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION_AMERICA}
+    DOMAIN: ${DOMAIN_WEB_PRODUCTION_AMERICA}
+    SECRET_YAML: ${SECRET_YAML_WEB_PRODUCTION_AMERICA}
+    NAMESPACE: ${NAMESPACE_WEB_PRODUCTION_AMERICA}
+    APP_NAME: ${WEB_APP_NAME}
+    PART_OF: ${WEB_PART_OF}
+    ENVIRONMENT: production
+    ENVIRONMENT_NAME: "production-america/web"
+    ENVIRONMENT_PATH: ${ENVIRONMENT_PATH_WEB_AMERICA}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_WEB_PRODUCTION_AMERICA" "CLUSTER_NAME_PRODUCTION_AMERICA" "CLUSTER_ZONE_PRODUCTION_AMERICA" "NAMESPACE_WEB_PRODUCTION_AMERICA"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  rules:
+    - if: '$ENABLE_HELM_DIFF == "true" && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+
+# ASIA
+
+deploy:helm:api:production:asia:
+  extends: .deploy:production:helm
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_API_PRODUCTION_ASIA}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION_ASIA}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION_ASIA}
+    DOMAIN: ${DOMAIN_API_PRODUCTION_ASIA}
+    SECRET_YAML: ${SECRET_YAML_API_PRODUCTION_ASIA}
+    NAMESPACE: ${NAMESPACE_API_PRODUCTION_ASIA}
+    APP_NAME: ${API_APP_NAME}
+    PART_OF: ${API_PART_OF}
+    ENVIRONMENT: production
+    ENVIRONMENT_NAME: "production-asia/api"
+    ENVIRONMENT_PATH: ${ENVIRONMENT_PATH_API_ASIA}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_API_PRODUCTION_ASIA" "CLUSTER_NAME_PRODUCTION_ASIA" "CLUSTER_ZONE_PRODUCTION_ASIA" "NAMESPACE_API_PRODUCTION_ASIA" "DOMAIN_API_PRODUCTION_ASIA"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+deploy:helm:web:production:asia:
+  extends: .deploy:production:helm
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_WEB_PRODUCTION_ASIA}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION_ASIA}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION_ASIA}
+    DOMAIN: ${DOMAIN_WEB_PRODUCTION_ASIA}
+    SECRET_YAML: ${SECRET_YAML_WEB_PRODUCTION_ASIA}
+    NAMESPACE: ${NAMESPACE_WEB_PRODUCTION_ASIA}
+    APP_NAME: ${WEB_APP_NAME}
+    PART_OF: ${WEB_PART_OF}
+    ENVIRONMENT: production
+    ENVIRONMENT_NAME: "production-asia/web"
+    ENVIRONMENT_PATH: ${ENVIRONMENT_PATH_WEB_ASIA}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_WEB_PRODUCTION_ASIA" "CLUSTER_NAME_PRODUCTION_ASIA" "CLUSTER_ZONE_PRODUCTION_ASIA" "NAMESPACE_WEB_PRODUCTION_ASIA" "DOMAIN_WEB_PRODUCTION_ASIA"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+verify:api:production:asia:
+  extends: .verify
+
+  stage: verify
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_API_PRODUCTION_ASIA}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION_ASIA}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION_ASIA}
+    NAMESPACE: ${NAMESPACE_API_PRODUCTION_ASIA}
+    APP_NAME: ${API_APP_NAME}
+    PART_OF: ${API_PART_OF}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_API_PRODUCTION_ASIA" "CLUSTER_NAME_PRODUCTION_ASIA" "CLUSTER_ZONE_PRODUCTION_ASIA" "NAMESPACE_API_PRODUCTION_ASIA"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  only:
+    - /^v.+$/i
+  except:
+    - branches
+
+verify:web:production:asia:
+  extends: .verify
+
+  stage: verify
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_WEB_PRODUCTION_ASIA}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION_ASIA}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION_ASIA}
+    NAMESPACE: ${NAMESPACE_WEB_PRODUCTION_ASIA}
+    APP_NAME: ${WEB_APP_NAME}
+    PART_OF: ${WEB_PART_OF}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_WEB_PRODUCTION_ASIA" "CLUSTER_NAME_PRODUCTION_ASIA" "CLUSTER_ZONE_PRODUCTION_ASIA" "NAMESPACE_WEB_PRODUCTION_ASIA"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  only:
+    - /^v.+$/i
+  except:
+    - branches
+
+helm:diff:api:production:asia:
+  extends: .helm:diff
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_API_PRODUCTION_ASIA}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION_ASIA}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION_ASIA}
+    DOMAIN: ${DOMAIN_API_PRODUCTION_ASIA}
+    SECRET_YAML: ${SECRET_YAML_API_PRODUCTION_ASIA}
+    NAMESPACE: ${NAMESPACE_API_PRODUCTION_ASIA}
+    APP_NAME: ${API_APP_NAME}
+    PART_OF: ${API_PART_OF}
+    ENVIRONMENT: production
+    ENVIRONMENT_NAME: "production-asia/api"
+    ENVIRONMENT_PATH: ${ENVIRONMENT_PATH_API_ASIA}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_API_PRODUCTION_ASIA" "CLUSTER_NAME_PRODUCTION_ASIA" "CLUSTER_ZONE_PRODUCTION_ASIA" "NAMESPACE_API_PRODUCTION_ASIA"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  rules:
+    - if: '$ENABLE_HELM_DIFF == "true" && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+
+helm:diff:web:production:asia:
+  extends: .helm:diff
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_WEB_PRODUCTION_ASIA}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION_ASIA}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION_ASIA}
+    DOMAIN: ${DOMAIN_WEB_PRODUCTION_ASIA}
+    SECRET_YAML: ${SECRET_YAML_WEB_PRODUCTION_ASIA}
+    NAMESPACE: ${NAMESPACE_WEB_PRODUCTION_ASIA}
+    APP_NAME: ${WEB_APP_NAME}
+    PART_OF: ${WEB_PART_OF}
+    ENVIRONMENT: production
+    ENVIRONMENT_NAME: "production-asia/web"
+    ENVIRONMENT_PATH: ${ENVIRONMENT_PATH_WEB_ASIA}
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_WEB_PRODUCTION_ASIA" "CLUSTER_NAME_PRODUCTION_ASIA" "CLUSTER_ZONE_PRODUCTION_ASIA" "NAMESPACE_WEB_PRODUCTION_ASIA"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  rules:
+    - if: '$ENABLE_HELM_DIFF == "true" && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'

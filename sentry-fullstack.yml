@@ -1,0 +1,39 @@
+---
+include:
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.12.0/templates/sentry.yml"
+
+sentry:api:release:set:
+  extends: .sentry:release:set
+
+  variables:
+    SENTRY_PROJECT: ${SENTRY_API_PROJECT}
+
+sentry:web:release:set:
+  extends: .sentry:release:set
+
+  variables:
+    SENTRY_PROJECT: ${SENTRY_WEB_PROJECT}
+
+sentry:api:release:finalize:
+  extends: .sentry:release:finalize
+
+  variables:
+    SENTRY_PROJECT: ${SENTRY_API_PROJECT}
+
+sentry:web:release:finalize:
+  extends: .sentry:release:finalize
+
+  variables:
+    SENTRY_PROJECT: ${SENTRY_WEB_PROJECT}
+
+sentry:api:notify:
+  extends: .sentry:notify
+
+  variables:
+    SENTRY_PROJECT: ${SENTRY_API_PROJECT}
+
+sentry:web:notify:
+  extends: .sentry:notify
+
+  variables:
+    SENTRY_PROJECT: ${SENTRY_WEB_PROJECT}

@@ -188,7 +188,7 @@
 
       fi
 
-deploy:quality:helm:
+.deploy:quality:helm:
   extends: .helm:deploy
   only:
     - master

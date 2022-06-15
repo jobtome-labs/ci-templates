@@ -1,8 +1,10 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.11.0/templates/helm.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.12.0/templates/helm.yml"
 
 deploy:quality:helm:
+  extends: .deploy:quality:helm
+
   variables:
     CI_COMMIT_TAG: ${CI_COMMIT_SHORT_SHA}
     GOOGLE_KEY: ${GOOGLE_KEY_QUALITY}
