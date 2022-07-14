@@ -12,8 +12,6 @@ endpoints:validate:production:
 
   only:
     - merge_requests
-    - master
-    - main
     - /^v.+$/i
 
   except:
