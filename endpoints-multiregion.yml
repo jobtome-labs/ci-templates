@@ -1,0 +1,108 @@
+---
+include:
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.13.0/endpoints-quality.yml"
+
+# EUROPE
+
+endpoints:validate:production:europe:
+  extends: .endpoints:validate
+
+  stage: test
+
+  variables:
+    ENDPOINTS_HOST: ${PRODUCTION_EUROPE_ENDPOINTS_HOST}
+
+  only:
+    - merge_requests
+    - master
+    - main
+    - /^v.+$/i
+
+  except:
+    variables:
+      - $CI_FAST_TRACK == "true"
+
+endpoints:deploy:production:europe:
+  extends: .endpoints:deploy
+
+  stage: deploy
+
+  variables:
+    ENDPOINTS_HOST: ${PRODUCTION_EUROPE_ENDPOINTS_HOST}
+
+  only:
+    - /^v.+$/i
+
+  environment:
+    name: production-europe
+    url: ${PRODUCTION_EUROPE_ENDPOINTS_HOST}
+
+# AMERICA
+
+endpoints:validate:production:america:
+  extends: .endpoints:validate
+
+  stage: test
+
+  variables:
+    ENDPOINTS_HOST: ${PRODUCTION_AMERICA_ENDPOINTS_HOST}
+
+  only:
+    - merge_requests
+    - master
+    - main
+    - /^v.+$/i
+
+  except:
+    variables:
+      - $CI_FAST_TRACK == "true"
+
+endpoints:deploy:production:america:
+  extends: .endpoints:deploy
+
+  stage: deploy
+
+  variables:
+    ENDPOINTS_HOST: ${PRODUCTION_AMERICA_ENDPOINTS_HOST}
+
+  only:
+    - /^v.+$/i
+
+  environment:
+    name: production-america
+    url: ${PRODUCTION_AMERICA_ENDPOINTS_HOST}
+
+# ASIA
+
+endpoints:validate:production:asia:
+  extends: .endpoints:validate
+
+  stage: test
+
+  variables:
+    ENDPOINTS_HOST: ${PRODUCTION_ASIA_ENDPOINTS_HOST}
+
+  only:
+    - merge_requests
+    - master
+    - main
+    - /^v.+$/i
+
+  except:
+    variables:
+      - $CI_FAST_TRACK == "true"
+
+endpoints:deploy:production:asia:
+  extends: .endpoints:deploy
+
+  stage: deploy
+
+  variables:
+    ENDPOINTS_HOST: ${PRODUCTION_ASIA_ENDPOINTS_HOST}
+
+  only:
+    - /^v.+$/i
+
+  environment:
+    name: production-asia
+    url: ${PRODUCTION_ASIA_ENDPOINTS_HOST}

@@ -1,0 +1,90 @@
+---
+.endpoints:
+  image: jobtomelabs/ci-image-gcp:v1.4.0
+
+.endpoints:connect:
+  extends: .endpoints
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY" "GOOGLE_PROJECT"; do
+        if [ -z "${!var}" ]; then
+          echo "[ERROR] Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+    - |
+
+      # GOOGLE CLOUD AUTHENTICATION PHASE
+
+      echo "${GOOGLE_KEY}" > /tmp/key.json
+
+      gcloud auth activate-service-account --key-file=/tmp/key.json --project="${GOOGLE_PROJECT}"
+
+      gcloud config set project "${GOOGLE_PROJECT}"
+
+      echo
+      echo "[OK] Successfully Authenticated to Google Cloud Project '${GOOGLE_PROJECT}'."
+      echo
+
+  script:
+    - &check_variables |
+
+      # CHECK VARIABLES PHASE
+
+      if [ -z "${ENDPOINTS_OPENAPI_FILE}" ]; then
+        ENDPOINTS_OPENAPI_FILE=openapi.json
+      fi
+
+    - &replace_variables |
+
+      # REPLACE VARIABLES PHASE
+
+      envsubst '${ENDPOINTS_HOST}' < ${ENDPOINTS_OPENAPI_FILE} > /tmp/openapi
+      cp /tmp/openapi ${ENDPOINTS_OPENAPI_FILE}
+
+.endpoints:validate:
+  extends: .endpoints:connect
+
+  script:
+    - *check_variables
+    - *replace_variables
+
+    - &endpoints_validation |
+
+      # ENDPOINTS VALIDATION PHASE
+
+      echo
+      echo "Validating Endpoints Configuration from File '${ENDPOINTS_OPENAPI_FILE}' .."
+      echo
+
+      gcloud endpoints services deploy ${ENDPOINTS_OPENAPI_FILE} --validate-only
+
+      echo
+      echo "[OK] Successfully Validated Endpoints Configuration from File '${ENDPOINTS_OPENAPI_FILE}'."
+      echo
+
+.endpoints:deploy:
+  extends: .endpoints:connect
+
+  script:
+    - *check_variables
+    - *replace_variables
+
+    - &endpoints_deployment |
+
+      # ENDPOINTS DEPLOYMENT PHASE
+
+      echo
+      echo "Deploying Endpoints Configuration from File '${ENDPOINTS_OPENAPI_FILE}' .."
+      echo
+
+      gcloud endpoints services deploy ${ENDPOINTS_OPENAPI_FILE}
+
+      echo
+      echo "[OK] Successfully Deployed Endpoints Configuration from File '${ENDPOINTS_OPENAPI_FILE}'."
+      echo

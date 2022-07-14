@@ -1,0 +1,18 @@
+---
+include:
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.13.0/templates/endpoints.yml"
+
+endpoints:validate:
+  extends: .endpoints:validate
+
+  stage: test
+
+  only:
+    - merge_requests
+    - master
+    - main
+    - /^v.+$/i
+
+  except:
+    variables:
+      - $CI_FAST_TRACK == "true"
