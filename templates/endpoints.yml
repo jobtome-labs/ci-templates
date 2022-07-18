@@ -44,7 +44,7 @@
 
       # REPLACE VARIABLES PHASE
 
-      envsubst '${ENDPOINTS_HOST}' < ${ENDPOINTS_OPENAPI_FILE} > /tmp/openapi
+      envsubst '${ENDPOINTS_HOST} ${ENDPOINTS_TITLE}' < ${ENDPOINTS_OPENAPI_FILE} > /tmp/openapi
       cp /tmp/openapi ${ENDPOINTS_OPENAPI_FILE}
 
 .endpoints:validate:

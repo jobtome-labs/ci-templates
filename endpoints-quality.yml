@@ -9,6 +9,7 @@ endpoints:validate:quality:
 
   variables:
     ENDPOINTS_HOST: ${QUALITY_ENDPOINTS_HOST}
+    ENDPOINTS_TITLE: ${QUALITY_ENDPOINTS_TITLE}
 
   only:
     - merge_requests
@@ -26,6 +27,7 @@ endpoints:deploy:quality:
 
   variables:
     ENDPOINTS_HOST: ${QUALITY_ENDPOINTS_HOST}
+    ENDPOINTS_TITLE: ${QUALITY_ENDPOINTS_TITLE}
 
   only:
     - master

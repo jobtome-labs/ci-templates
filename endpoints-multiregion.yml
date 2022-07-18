@@ -11,6 +11,7 @@ endpoints:validate:production:europe:
 
   variables:
     ENDPOINTS_HOST: ${PRODUCTION_EUROPE_ENDPOINTS_HOST}
+    ENDPOINTS_TITLE: ${PRODUCTION_EUROPE_ENDPOINTS_TITLE}
 
   only:
     - merge_requests
@@ -27,6 +28,7 @@ endpoints:deploy:production:europe:
 
   variables:
     ENDPOINTS_HOST: ${PRODUCTION_EUROPE_ENDPOINTS_HOST}
+    ENDPOINTS_TITLE: ${PRODUCTION_EUROPE_ENDPOINTS_TITLE}
 
   only:
     - /^v.+$/i
@@ -44,6 +46,7 @@ endpoints:validate:production:america:
 
   variables:
     ENDPOINTS_HOST: ${PRODUCTION_AMERICA_ENDPOINTS_HOST}
+    ENDPOINTS_TITLE: ${PRODUCTION_AMERICA_ENDPOINTS_TITLE}
 
   only:
     - merge_requests
@@ -60,6 +63,7 @@ endpoints:deploy:production:america:
 
   variables:
     ENDPOINTS_HOST: ${PRODUCTION_AMERICA_ENDPOINTS_HOST}
+    ENDPOINTS_TITLE: ${PRODUCTION_AMERICA_ENDPOINTS_TITLE}
 
   only:
     - /^v.+$/i
@@ -77,6 +81,7 @@ endpoints:validate:production:asia:
 
   variables:
     ENDPOINTS_HOST: ${PRODUCTION_ASIA_ENDPOINTS_HOST}
+    ENDPOINTS_TITLE: ${PRODUCTION_ASIA_ENDPOINTS_TITLE}
 
   only:
     - merge_requests
@@ -93,6 +98,7 @@ endpoints:deploy:production:asia:
 
   variables:
     ENDPOINTS_HOST: ${PRODUCTION_ASIA_ENDPOINTS_HOST}
+    ENDPOINTS_TITLE: ${PRODUCTION_ASIA_ENDPOINTS_TITLE}
 
   only:
     - /^v.+$/i

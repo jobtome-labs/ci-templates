@@ -9,6 +9,7 @@ endpoints:validate:production:
 
   variables:
     ENDPOINTS_HOST: ${PRODUCTION_ENDPOINTS_HOST}
+    ENDPOINTS_TITLE: ${PRODUCTION_ENDPOINTS_TITLE}
 
   only:
     - merge_requests
@@ -25,6 +26,7 @@ endpoints:deploy:production:
 
   variables:
     ENDPOINTS_HOST: ${PRODUCTION_ENDPOINTS_HOST}
+    ENDPOINTS_TITLE: ${PRODUCTION_ENDPOINTS_TITLE}
 
   only:
     - /^v.+$/i
