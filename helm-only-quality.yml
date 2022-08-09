@@ -1,6 +1,6 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.13.2/templates/helm.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.14.0/templates/helm.yml"
 
 deploy:quality:helm:
   extends: .deploy:quality:helm
@@ -15,6 +15,7 @@ deploy:quality:helm:
     NAMESPACE: ${NAMESPACE_QUALITY}
     ENVIRONMENT: quality
     ENVIRONMENT_NAME: quality
+
   before_script:
     - |
       # CHECK VARIABLES PHASE
@@ -24,17 +25,23 @@ deploy:quality:helm:
             exit 1
           fi
       done
+
+  resource_group: quality
+
   only:
     - master
 
 verify:quality:
   extends: .verify
+
   stage: verify
+
   variables:
     GOOGLE_KEY: ${GOOGLE_KEY_QUALITY}
     CLUSTER_NAME: ${CLUSTER_NAME_QUALITY}
     CLUSTER_ZONE: ${CLUSTER_ZONE_QUALITY}
     NAMESPACE: ${NAMESPACE_QUALITY}
+
   before_script:
     - |
       # CHECK VARIABLES PHASE
@@ -44,5 +51,6 @@ verify:quality:
             exit 1
           fi
       done
+
   only:
     - master

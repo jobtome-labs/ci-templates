@@ -1,6 +1,6 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.13.2/helm-fullstack-quality.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.14.0/helm-fullstack-quality.yml"
 
 # EUROPE
 
@@ -32,6 +32,8 @@ deploy:helm:api:production:europe:
         fi
       done
 
+  resource_group: production-europe-api
+
 deploy:helm:web:production:europe:
   extends: .deploy:production:helm
 
@@ -59,6 +61,8 @@ deploy:helm:web:production:europe:
           exit 1
         fi
       done
+
+  resource_group: production-europe-web
 
 verify:api:production:europe:
   extends: .verify
@@ -212,6 +216,8 @@ deploy:helm:api:production:america:
         fi
       done
 
+  resource_group: production-america-api
+
 deploy:helm:web:production:america:
   extends: .deploy:production:helm
 
@@ -239,6 +245,8 @@ deploy:helm:web:production:america:
           exit 1
         fi
       done
+
+  resource_group: production-america-web
 
 verify:api:production:america:
   extends: .verify
@@ -392,6 +400,8 @@ deploy:helm:api:production:asia:
         fi
       done
 
+  resource_group: production-asia-api
+
 deploy:helm:web:production:asia:
   extends: .deploy:production:helm
 
@@ -419,6 +429,8 @@ deploy:helm:web:production:asia:
           exit 1
         fi
       done
+
+  resource_group: production-asia-web
 
 verify:api:production:asia:
   extends: .verify

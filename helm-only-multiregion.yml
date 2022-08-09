@@ -1,6 +1,6 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.13.2/helm-only-quality.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.14.0/helm-only-quality.yml"
 
 # EUROPE
 deploy:production:europe:helm:
@@ -24,6 +24,8 @@ deploy:production:europe:helm:
             exit 1
           fi
       done
+
+  resource_group: production-europe
 
 verify:production:europe:
   extends: .verify
@@ -70,6 +72,8 @@ deploy:production:america:helm:
           fi
       done
 
+  resource_group: production-america
+
 verify:production:america:
   extends: .verify
   stage: verify
@@ -114,6 +118,8 @@ deploy:production:asia:helm:
             exit 1
           fi
       done
+
+  resource_group: production-asia
 
 verify:production:asia:
   extends: .verify
