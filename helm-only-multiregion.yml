@@ -25,6 +25,8 @@ deploy:production:europe:helm:
           fi
       done
 
+  resource_group: production-europe
+
 verify:production:europe:
   extends: .verify
   stage: verify
@@ -70,6 +72,8 @@ deploy:production:america:helm:
           fi
       done
 
+  resource_group: production-america
+
 verify:production:america:
   extends: .verify
   stage: verify
@@ -114,6 +118,8 @@ deploy:production:asia:helm:
             exit 1
           fi
       done
+
+  resource_group: production-asia
 
 verify:production:asia:
   extends: .verify

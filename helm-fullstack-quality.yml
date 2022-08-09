@@ -31,6 +31,8 @@ deploy:helm:api:quality:
         fi
       done
 
+  resource_group: quality-api
+
   only:
     - master
 
@@ -61,6 +63,8 @@ deploy:helm:web:quality:
           exit 1
         fi
       done
+
+  resource_group: quality-web
 
   only:
     - master

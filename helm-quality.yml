@@ -29,6 +29,8 @@ deploy:quality:helm:
           fi
       done
 
+  resource_group: quality
+
   only:
     - master
 

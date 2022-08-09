@@ -27,6 +27,8 @@ deploy:internal:helm:
         fi
       done
 
+  resource_group: internal
+
 verify:internal:
   extends: .verify
 

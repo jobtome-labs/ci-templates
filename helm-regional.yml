@@ -27,6 +27,8 @@ deploy:production:helm:
           fi
       done
 
+  resource_group: production
+
 verify:production:
   extends: .verify
 
