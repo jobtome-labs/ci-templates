@@ -246,7 +246,7 @@
         KUBERNETES_DIR=kube
       fi
 
-      if [ ! -f "${KUBERNETES_DIR}/${ENVIRONMENT}/secrets.yaml" && -z "${SECRET_YAML}" ]; then
+      if [ ! -f "${KUBERNETES_DIR}/${ENVIRONMENT}/secrets.yaml" ] && [ -z "${SECRET_YAML}" ]; then
         echo
         echo "-> [WARN] No secret to apply!"
         echo
