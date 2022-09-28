@@ -1,8 +1,8 @@
 publish:calendar:
-  image: jobtomelabs/calendar-publisher:0.0.1
+  image: jobtomelabs/calendar-publisher:v0.0.1
   stage: notify
   script:
-    - python3 entrypoint.py
+    - python3 /app/entrypoint.py
   only:
     - /^v.+$/i
   except:
