@@ -1,5 +1,5 @@
 publish:calendar:
-  image: jobtomelabs/calendar-publisher:v0.0.4
+  image: jobtomelabs/calendar-publisher:v0.0.5
   stage: notify
   script:
     - python3 /app/entrypoint.py
