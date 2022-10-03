@@ -1,12 +1,18 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.15.0/templates/sentry.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.16.0/templates/sentry.yml"
 
 sentry:release:set:
   extends: .sentry:release:set
 
+  allow_failure: true
+
 sentry:release:finalize:
   extends: .sentry:release:finalize
 
+  allow_failure: true
+
 sentry:notify:
   extends: .sentry:notify
+
+  allow_failure: true
