@@ -8,11 +8,15 @@ sentry:api:release:set:
   variables:
     SENTRY_PROJECT: ${SENTRY_API_PROJECT}
 
+  allow_failure: true
+
 sentry:web:release:set:
   extends: .sentry:release:set
 
   variables:
     SENTRY_PROJECT: ${SENTRY_WEB_PROJECT}
+
+  allow_failure: true
 
 sentry:api:release:finalize:
   extends: .sentry:release:finalize
@@ -20,11 +24,15 @@ sentry:api:release:finalize:
   variables:
     SENTRY_PROJECT: ${SENTRY_API_PROJECT}
 
+  allow_failure: true
+
 sentry:web:release:finalize:
   extends: .sentry:release:finalize
 
   variables:
     SENTRY_PROJECT: ${SENTRY_WEB_PROJECT}
+
+  allow_failure: true
 
 sentry:api:notify:
   extends: .sentry:notify
@@ -32,8 +40,12 @@ sentry:api:notify:
   variables:
     SENTRY_PROJECT: ${SENTRY_API_PROJECT}
 
+  allow_failure: true
+
 sentry:web:notify:
   extends: .sentry:notify
 
   variables:
     SENTRY_PROJECT: ${SENTRY_WEB_PROJECT}
+
+  allow_failure: true

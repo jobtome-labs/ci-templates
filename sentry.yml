@@ -5,8 +5,14 @@ include:
 sentry:release:set:
   extends: .sentry:release:set
 
+  allow_failure: true
+
 sentry:release:finalize:
   extends: .sentry:release:finalize
 
+  allow_failure: true
+
 sentry:notify:
   extends: .sentry:notify
+
+  allow_failure: true
