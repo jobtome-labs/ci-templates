@@ -31,11 +31,7 @@ publish:slack:
       fi
 
       git tag -l "${CI_COMMIT_TAG}" --format='%(subject)' | tr -d '\r' > /tmp/msg.txt
-      #echo "${MESSAGE}" | sed 's/\"/\\\"/g'  > /tmp/msg.txt
-     
-      echo "MSG:"
-      cat /tmp/msg.txt
-     
+      
       cat <<EOF > /tmp/attachment.txt
       {
         "color": "#37FDFC",
@@ -56,9 +52,6 @@ publish:slack:
       }
       EOF
       
-      echo "ATT:"
-      cat /tmp/attachment.txt
-
       ATTACHMENT=" \"attachments\": [$(cat /tmp/attachment.txt)]"
 
       PAYLOAD="payload={${ATTACHMENT}, ${PICTURE}, \"username\": \"${SLACK_USERNAME}\" }"
