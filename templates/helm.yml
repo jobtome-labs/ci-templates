@@ -155,7 +155,14 @@
 
       helm status "${APP_NAME}" > /dev/null 2>&1 || WAIT="10m"
 
-      helm upgrade --install --atomic "${APP_NAME}" "current-repo/${CHART_NAME}" --wait --timeout "${TIMEOUT}" -f /tmp/values.yaml --namespace "${NAMESPACE}" --version ${CHART_VERSION}
+      if [ -f "${HELM_FILES_PATH}/app-secrets.yaml" ]; then
+        echo "Application Secrets Detected (at Path \"${HELM_FILES_PATH}/app-secrets.yaml\")."
+        echo "${SOPS_KEY}" > /tmp/sops.json
+        GOOGLE_APPLICATION_CREDENTIALS=/tmp/sops.json sops --decrypt "${HELM_FILES_PATH}/app-secrets.yaml" | helm upgrade --install --atomic "${APP_NAME}" "current-repo/${CHART_NAME}" --wait --timeout "${TIMEOUT}" -f /tmp/values.yaml --namespace "${NAMESPACE}" --version ${CHART_VERSION} --values -
+      else
+        echo "No Application Secrets Detected (at Path \"${HELM_FILES_PATH}/app-secrets.yaml\")."
+        helm upgrade --install --atomic "${APP_NAME}" "current-repo/${CHART_NAME}" --wait --timeout "${TIMEOUT}" -f /tmp/values.yaml --namespace "${NAMESPACE}" --version ${CHART_VERSION}
+      fi
 
       if [ $WAIT == "10m" ]; then
         echo "Seems like it's the First Release."
