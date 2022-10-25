@@ -30,9 +30,9 @@ publish:slack:
         SLACK_USERNAME="CI notifier"
       fi
 
-      MESSAGE=$(git tag -l "${CI_COMMIT_TAG}" --format='%(subject)' | tr '\n' ' ' | tr '*' '-')
+      git tag -l "${CI_COMMIT_TAG}" --format='%(subject)' | tr '\n' ' ' | tr '*' '-' > /tmp/msg.txt
       #echo "${MESSAGE}" | sed 's/\"/\\\"/g'  > /tmp/msg.txt
-
+     
       echo "MSG:"
       cat /tmp/msg.txt
      
