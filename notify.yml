@@ -31,7 +31,7 @@ publish:slack:
       fi
 
       MESSAGE=$(git tag -l "${CI_COMMIT_TAG}" --format='%(subject)')
-      echo "${MESSAGE}" | sed 's/\"/\\\"/g' | tr '\n' ' ' > /tmp/msg.txt
+      echo "${MESSAGE}" | sed 's/\"/\\\"/g' | tr '\n' ' ' | tr '*' '-'  > /tmp/msg.txt
 
       cat <<EOF > /tmp/attachment.txt
       {
