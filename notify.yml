@@ -33,6 +33,8 @@ publish:slack:
       MESSAGE=$(git tag -l "${CI_COMMIT_TAG}" --format='%(subject)')
       echo "${MESSAGE}" | sed 's/\"/\\\"/g' | tr '\n' ' ' | tr '*' '-'  > /tmp/msg.txt
 
+      cat /tmp/msg.txt
+     
       cat <<EOF > /tmp/attachment.txt
       {
         "color": "#37FDFC",
@@ -52,6 +54,7 @@ publish:slack:
         "fallback": "Deployment of ${CI_PROJECT_NAME} ${CI_COMMIT_TAG} completed\n \nMore info: <${CI_PIPELINE_URL}|${CI_PIPELINE_URL}>"
       }
       EOF
+      cat /tmp/attachment.txt
 
       ATTACHMENT=" \"attachments\": [$(cat /tmp/attachment.txt)]"
 
