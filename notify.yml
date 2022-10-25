@@ -30,9 +30,8 @@ publish:slack:
         SLACK_USERNAME="CI notifier"
       fi
 
-      MESSAGE=$(git tag -l "${CI_COMMIT_TAG}" --format='%(subject)')
-      echo "${MESSAGE}" | sed 's/\"/\\\"/g' > /tmp/msg.txt
-
+      git tag -l "${CI_COMMIT_TAG}" --format='%(subject)' | tr -d '\r' > /tmp/msg.txt
+      
       cat <<EOF > /tmp/attachment.txt
       {
         "color": "#37FDFC",
