@@ -1,5 +1,5 @@
 include:
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.16.0/dataflow-quality.yml'
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.17.0/dataflow-quality.yml'
 
 deploy:production:dataflow:
   extends: .deploy:dataflow
