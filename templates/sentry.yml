@@ -27,6 +27,7 @@
     - merge_requests
     - master
     - /^v.+$/i
+    - /^qa.+$/i
 
   when: on_success
 

@@ -1,6 +1,6 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.18.2/templates/endpoints.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.19.0/templates/endpoints.yml"
 
 endpoints:validate:quality:
   extends: .endpoints:validate
@@ -15,6 +15,7 @@ endpoints:validate:quality:
     - merge_requests
     - master
     - main
+    - /^qa.+$/i
 
   except:
     variables:
@@ -32,6 +33,7 @@ endpoints:deploy:quality:
   only:
     - master
     - main
+    - /^qa.+$/i
 
   environment:
     name: quality

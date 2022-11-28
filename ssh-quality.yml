@@ -1,5 +1,5 @@
 include:
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.18.2/templates/ssh.yml'
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.19.0/templates/ssh.yml'
 
 ssh:quality:
   extends: .ssh:exec
@@ -22,3 +22,4 @@ ssh:quality:
       done
   only:
     - master
+    - /^qa.+$/i

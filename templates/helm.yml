@@ -199,6 +199,7 @@
   extends: .helm:deploy
   only:
     - master
+    - /^qa.+$/i
   environment:
     name: ${ENVIRONMENT_NAME}
     url: https://${DOMAIN}

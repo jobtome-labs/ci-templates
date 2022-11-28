@@ -1,5 +1,5 @@
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.18.2/templates/docker.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.19.0/templates/docker.yml"
 
 build:
   stage: build
@@ -124,6 +124,7 @@ build:
       fi
   only:
     - /^v.+$/i
+    - /^qa.+$/i
     - master
     - merge_requests
   except:
@@ -217,6 +218,7 @@ build:cache:
       fi
   only:
     - /^v.+$/i
+    - /^qa.+$/i
     - master
     - merge_requests
   except:

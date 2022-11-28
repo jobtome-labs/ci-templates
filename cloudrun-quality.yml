@@ -1,6 +1,6 @@
 include:
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.18.2/docker.yml'
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.18.2/templates/cloudrun.yml'
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.19.0/docker.yml'
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.19.0/templates/cloudrun.yml'
 
 deploy:quality:
   extends: .cloudrun:deploy
@@ -16,3 +16,4 @@ deploy:quality:
     CONFIGMAP_PATH: "${CONFIGMAP_PATH_QUALITY}"
   only:
     - master
+    - /^qa.+$/i

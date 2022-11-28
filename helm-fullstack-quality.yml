@@ -1,7 +1,7 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.18.2/docker.yml"
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.18.2/templates/helm.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.19.0/docker.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.19.0/templates/helm.yml"
 
 deploy:helm:api:quality:
   extends: .deploy:quality:helm
@@ -35,6 +35,7 @@ deploy:helm:api:quality:
 
   only:
     - master
+    - /^qa.+$/i
 
 deploy:helm:web:quality:
   extends: .deploy:quality:helm
@@ -68,6 +69,7 @@ deploy:helm:web:quality:
 
   only:
     - master
+    - /^qa.+$/i
 
 verify:api:quality:
   extends: .verify
@@ -96,6 +98,7 @@ verify:api:quality:
 
   only:
     - master
+    - /^qa.+$/i
 
 verify:web:quality:
   extends: .verify
@@ -124,6 +127,7 @@ verify:web:quality:
 
   only:
     - master
+    - /^qa.+$/i
 
 helm:diff:api:quality:
   extends: .helm:diff
