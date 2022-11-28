@@ -1,6 +1,6 @@
 include:
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.18.2/docker.yml'
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.18.2/templates/kubernetes.yml'
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.19.0/docker.yml'
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.19.0/templates/kubernetes.yml'
 
 deploy:quality:image:
   extends: .deploy:image
@@ -25,6 +25,7 @@ deploy:quality:image:
       done
   only:
     - master
+    - /^qa.+$/i
   environment:
     name: ${ENVIRONMENT_NAME}
     url: https://${DOMAIN}
@@ -53,6 +54,7 @@ deploy:quality:manifest:
   when: manual
   only:
     - master
+    - /^qa.+$/i
   environment:
     name: ${ENVIRONMENT_NAME}
     url: https://${DOMAIN}
@@ -77,3 +79,4 @@ rollback:quality:
   when: on_failure
   only:
     - master
+    - /^qa.+$/i
