@@ -5,14 +5,44 @@ include:
 sentry:release:set:
   extends: .sentry:release:set
 
+  stage: build
+
+  only:
+    - merge_requests
+    - master
+    - /^qa.+$/i
+    - /^v.+$/i
+
+  when: on_success
+
   allow_failure: true
 
 sentry:release:finalize:
   extends: .sentry:release:finalize
 
+  stage: deploy
+
+  only:
+    - merge_requests
+    - master
+    - /^qa.+$/i
+    - /^v.+$/i
+
+  when: on_success
+
   allow_failure: true
 
 sentry:notify:
   extends: .sentry:notify
+
+  stage: notify
+
+  only:
+    - merge_requests
+    - master
+    - /^qa.+$/i
+    - /^v.+$/i
+
+  when: on_success
 
   allow_failure: true
