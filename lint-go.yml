@@ -1,6 +1,6 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.19.0/templates/lint.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.20.0/templates/lint.yml"
 
 lint:go:
   extends: .lint
