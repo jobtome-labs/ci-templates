@@ -1,51 +1,111 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.19.0/templates/sentry.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.20.0/templates/sentry.yml"
 
 sentry:api:release:set:
   extends: .sentry:release:set
 
+  stage: build
+
   variables:
     SENTRY_PROJECT: ${SENTRY_API_PROJECT}
+
+  only:
+    - merge_requests
+    - master
+    - /^qa.+$/i
+    - /^v.+$/i
+
+  when: on_success
 
   allow_failure: true
 
 sentry:web:release:set:
   extends: .sentry:release:set
 
+  stage: build
+
   variables:
     SENTRY_PROJECT: ${SENTRY_WEB_PROJECT}
+
+  only:
+    - merge_requests
+    - master
+    - /^qa.+$/i
+    - /^v.+$/i
+
+  when: on_success
 
   allow_failure: true
 
 sentry:api:release:finalize:
   extends: .sentry:release:finalize
 
+  stage: deploy
+
   variables:
     SENTRY_PROJECT: ${SENTRY_API_PROJECT}
+
+  only:
+    - merge_requests
+    - master
+    - /^qa.+$/i
+    - /^v.+$/i
+
+  when: on_success
 
   allow_failure: true
 
 sentry:web:release:finalize:
   extends: .sentry:release:finalize
 
+  stage: deploy
+
   variables:
     SENTRY_PROJECT: ${SENTRY_WEB_PROJECT}
+
+  only:
+    - merge_requests
+    - master
+    - /^qa.+$/i
+    - /^v.+$/i
+
+  when: on_success
 
   allow_failure: true
 
 sentry:api:notify:
   extends: .sentry:notify
 
+  stage: notify
+
   variables:
     SENTRY_PROJECT: ${SENTRY_API_PROJECT}
+
+  only:
+    - merge_requests
+    - master
+    - /^qa.+$/i
+    - /^v.+$/i
+
+  when: on_success
 
   allow_failure: true
 
 sentry:web:notify:
   extends: .sentry:notify
 
+  stage: notify
+
   variables:
     SENTRY_PROJECT: ${SENTRY_WEB_PROJECT}
+
+  only:
+    - merge_requests
+    - master
+    - /^qa.+$/i
+    - /^v.+$/i
+
+  when: on_success
 
   allow_failure: true

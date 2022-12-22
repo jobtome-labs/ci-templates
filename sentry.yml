@@ -1,18 +1,48 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.19.0/templates/sentry.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.20.0/templates/sentry.yml"
 
 sentry:release:set:
   extends: .sentry:release:set
+
+  stage: build
+
+  only:
+    - merge_requests
+    - master
+    - /^qa.+$/i
+    - /^v.+$/i
+
+  when: on_success
 
   allow_failure: true
 
 sentry:release:finalize:
   extends: .sentry:release:finalize
 
+  stage: deploy
+
+  only:
+    - merge_requests
+    - master
+    - /^qa.+$/i
+    - /^v.+$/i
+
+  when: on_success
+
   allow_failure: true
 
 sentry:notify:
   extends: .sentry:notify
+
+  stage: notify
+
+  only:
+    - merge_requests
+    - master
+    - /^qa.+$/i
+    - /^v.+$/i
+
+  when: on_success
 
   allow_failure: true

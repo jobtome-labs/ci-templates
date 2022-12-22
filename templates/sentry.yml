@@ -23,20 +23,8 @@
 
       sentry-cli info
 
-  only:
-    - merge_requests
-    - master
-    - /^v.+$/i
-    - /^qa.+$/i
-
-  when: on_success
-
-  allow_failure: true
-
 .sentry:release:set:
   extends: .sentry
-
-  stage: build
 
   script:
     - *check-set-variables
@@ -62,8 +50,6 @@
 .sentry:release:finalize:
   extends: .sentry
 
-  stage: deploy
-
   script:
     - *check-set-variables
 
@@ -77,8 +63,6 @@
 
 .sentry:notify:
   extends: .sentry
-
-  stage: notify
 
   script:
     - *check-set-variables
