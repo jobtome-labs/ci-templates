@@ -1,6 +1,6 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.20.0/helm-fullstack-quality.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.21.0/helm-fullstack-quality.yml"
 
 deploy:helm:api:production:
   extends: .deploy:production:helm
