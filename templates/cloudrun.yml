@@ -1,47 +1,55 @@
+---
 .cloudrun:deploy:
-  image: jobtomelabs/ci-image-gcp:v1.0.1
+  image: jobtomelabs/ci-image-gcp:v1.5.0
+
   stage: deploy
+
+  variables:
+    GIT_DEPTH: 1
+
   script:
     - &connection |
       # CLUSTER CONNECTION PHASE
-      for var in "GOOGLE_KEY" "SERVICE_NAME" "CLUSTER_ZONE" "CLUSTER_NAME" "NAMESPACE" "GOOGLE_PROJECT"; do
-          if [ -z "${!var}" ]; then
-            echo
-            echo "-> [WARNING] Missing '${var}' variable!"
-            echo
-            exit 1
-          fi
+
+      for var in "GOOGLE_PROJECT" "REGION" "GOOGLE_KEY" "SERVICE_NAME" "PLATFORM" "GAR_IMAGE" "IMAGE_TAG"; do
+        if [ -z "${!var}" ]; then
+          echo
+          echo "-> [ERROR] Missing '${var}' Variable!"
+          echo
+
+          exit 1
+        fi
       done
+
       echo "${GOOGLE_KEY}" > /tmp/key.json
 
       gcloud config set project ${GOOGLE_PROJECT}
+      echo "Google Project '${GOOGLE_PROJECT}' Configured."
 
-      echo "Google project '${GOOGLE_PROJECT}' configured"
       gcloud auth activate-service-account --key-file /tmp/key.json
+
     - |
       # DEPLOY PHASE
 
-      echo
-      echo "-> Deploying cloudrun service '${SERVICE_NAME}' with tag '${CI_COMMIT_TAG}'"
-      echo
-
-      COMMAND_TO_RUN=( gcloud run deploy ${SERVICE_NAME} --image ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG} )
+      GAR_IMAGE_FULL_NAME="${GAR_IMAGE}:${IMAGE_TAG}"
 
       echo
-      echo "-> Setting '${CLUSTER_NAME}-${CLUSTER_ZONE}' cluster!"
+      echo "-> Deploying Cloud Run Service '${SERVICE_NAME}' with Tag '${CI_COMMIT_TAG}' .."
       echo
 
-      COMMAND_TO_RUN+=( --platform gke --cluster ${CLUSTER_NAME} --cluster-location ${CLUSTER_ZONE})
+      COMMAND_TO_RUN=( gcloud run deploy ${SERVICE_NAME} --project ${GOOGLE_PROJECT} --region ${REGION} --platform ${PLATFORM} --image ${GAR_IMAGE_FULL_NAME} )
 
-      echo
-      echo "-> Setting '${NAMESPACE}' namespace!"
-      echo
+      if [ -n "${SERVICE_ACCOUNT}" ]; then
+        echo
+        echo "-> Setting Service Account to '${SERVICE_ACCOUNT}'!"
+        echo
 
-      COMMAND_TO_RUN+=( --namespace ${NAMESPACE} )
+        COMMAND_TO_RUN+=( --service-account ${SERVICE_ACCOUNT} )
+      fi
 
       if [ -n "${CONNECTIVITY}" ]; then
         echo
-        echo "-> Setting connectivity to '${CONNECTIVITY}' !"
+        echo "-> Setting Connectivity to '${CONNECTIVITY}'!"
         echo
 
         COMMAND_TO_RUN+=( --connectivity ${CONNECTIVITY} )
@@ -49,7 +57,7 @@
 
       if [ -n "${TIMEOUT}" ]; then
         echo
-        echo "-> Setting timeout to '${TIMEOUT}' !"
+        echo "-> Setting Timeout to '${TIMEOUT}'!"
         echo
 
         COMMAND_TO_RUN+=( --timeout ${TIMEOUT} )
@@ -57,7 +65,7 @@
 
       if [ -n "${CONCURRENCY}" ]; then
         echo
-        echo "-> Setting concurrency to '${CONCURRENCY}' !"
+        echo "-> Setting Concurrency to '${CONCURRENCY}'!"
         echo
 
         COMMAND_TO_RUN+=( --concurrency ${CONCURRENCY} )
@@ -65,7 +73,7 @@
 
       if [ -n "${CPU}" ]; then
         echo
-        echo "-> Setting '${CPU}' cpu limit!"
+        echo "-> Setting CPU Limit to '${CPU}'!"
         echo
 
         COMMAND_TO_RUN+=( --cpu ${CPU} )
@@ -73,7 +81,7 @@
 
       if [ -n "${MEMORY}" ]; then
         echo
-        echo "-> Setting '${MEMORY}' mem limit!"
+        echo "-> Setting Memory Limit to '${MEMORY}'!"
         echo
 
         COMMAND_TO_RUN+=( --memory ${MEMORY} )
@@ -81,55 +89,34 @@
 
       if [ -n "${MAX_INSTANCES}" ]; then
         echo
-        echo "-> Setting '${MAX_INSTANCES}' max_instances!"
+        echo "-> Setting Maximum Instances to '${MAX_INSTANCES}'!"
         echo
 
-        COMMAND_TO_RUN+=( --max_instances ${MAX_INSTANCES} )
+        COMMAND_TO_RUN+=( --max-instances ${MAX_INSTANCES} )
       fi
 
-      if [ -n "${ENV}" ]; then
+      if [ -n "${ENV_FILE_PATH}" ]; then
         echo
-        echo "-> Setting env !"
+        echo "-> Setting Environment Variables!"
         echo
 
-        COMMAND_TO_RUN+=( --set-env-vars=${ENV} )
+        COMMAND_TO_RUN+=( --env-vars-file=${ENV_FILE_PATH} )
       fi
 
-      if [ -n "${SECRET_YAML}" ]; then
-
+      if [ -n "${SECRETS}" ]; then
         echo
-        echo "-> ... also deploying kubernetes secrets"
+        echo "-> Setting Secrets!"
         echo
 
-        echo "${SECRET_YAML}" | base64 -d > /tmp/secret.yaml
-        kubectl apply -f /tmp/secret.yaml --namespace=${NAMESPACE}
-
-        if [ -n "${SECRET_MOUNTS}" ]; then
-          COMMAND_TO_RUN+=( --set-secrets=[${SECRET_MOUNTS}] )
-        else
-          echo
-          echo "Missing SECRET_MOUNTS even if SECRET_YAML was configured!"
-          echo "You applied a secret without mounting it?"
-          echo
-        fi
+        COMMAND_TO_RUN+=( --set-secrets=${SECRETS} )
       fi
 
-      if [ -n "${CONFIGMAP_PATH}" ]; then
-
+      if [ -n "${INGRESS}" ]; then
         echo
-        echo "-> ... also deploying kubernetes configmaps"
+        echo "-> Setting Ingress to '${INGRESS}'!"
         echo
 
-        kubectl apply -f ${CONFIGMAP_PATH} --namespace=${NAMESPACE}
-
-        if [ -n "${CONFIGMAP_MOUNTS}" ]; then
-          COMMAND_TO_RUN+=( --set-config-maps=[${CONFIGMAP_MOUNTS}] )
-        else
-          echo
-          echo "Missing CONFIGMAP_MOUNTS even if CONFIGMAP_PATH was configured!"
-          echo "You applied a configmap without mounting it?"
-          echo
-        fi
+        COMMAND_TO_RUN+=( --ingress ${INGRESS} )
       fi
 
       STATUS=0
@@ -137,16 +124,16 @@
       ${COMMAND_TO_RUN[@]} || STATUS=1
 
       if [ "${STATUS}" = "1" ]; then
-        gcloud run services describe ${SERVICE_NAME} --platform gke --cluster ${CLUSTER_NAME} --cluster-location ${CLUSTER_ZONE} --namespace ${NAMESPACE}
+        gcloud run services describe ${SERVICE_NAME} --platform ${PLATFORM} --region ${REGION}
       fi
 
       exit ${STATUS}
 
       echo
-      echo "-> Deploy on ${ENVIRONMENT}: '${DOMAIN}' completed!"
+      echo "-> Deployment on '${ENVIRONMENT}' Completed Successfully!"
+      echo "-> Domain: '${DOMAIN}'"
       echo
+
   environment:
     name: ${ENVIRONMENT}
     url: http://${DOMAIN}
-  variables:
-    GIT_DEPTH: 1
