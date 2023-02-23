@@ -34,7 +34,8 @@
       GAR_IMAGE_FULL_NAME="${GAR_IMAGE}:${IMAGE_TAG}"
 
       echo
-      echo "-> Deploying Cloud Run Service '${SERVICE_NAME}' with Tag '${CI_COMMIT_TAG}' .."
+      echo "-> Deploying Cloud Run Service '${SERVICE_NAME}' with Tag '${IMAGE_TAG}' .."
+      echo "-> Image: '${GAR_IMAGE_FULL_NAME}'"
       echo
 
       COMMAND_TO_RUN=( gcloud run deploy ${SERVICE_NAME} --project ${GOOGLE_PROJECT} --region ${REGION} --platform ${PLATFORM} --image ${GAR_IMAGE_FULL_NAME} )
