@@ -1,11 +1,22 @@
 ---
 .container-registry:push:
+  image: jobtomelabs/dind-bash:20.10
+
+  services:
+    - docker:20-dind
+
   variables:
     GIT_STRATEGY: none
 
   before_script:
+    - echo "Waiting for Docker Daemon at tcp://localhost:2375 .."
+    - while ! nc -z localhost 2375; do sleep 0.1; done
+    - echo "Done."
+
+  script:
     - |
       # CHECK VARIABLES PHASE
+
       for var in "CONTAINER_REGISTRY_URL" "CONTAINER_REGISTRY_USERNAME" "CONTAINER_REGISTRY_PASSWORD" "GITLAB_CONTAINER_REGISTRY_IMAGE_FULL_PATH" "CONTAINER_REGISTRY_IMAGE_FULL_PATH" "IMAGE_TAG"; do
         if [ -z "${!var}" ]; then
           echo "Missing '${var}' Variable!"
@@ -13,7 +24,6 @@
         fi
       done
 
-  script:
     - |
       # GITLAB CONTAINER REGISTRY LOGIN PHASE
       echo -n "${CI_REGISTRY_PASSWORD}" | docker login -u "${CI_REGISTRY_USER}" --password-stdin "${CI_REGISTRY}"
