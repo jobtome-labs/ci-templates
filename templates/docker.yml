@@ -1,74 +1,74 @@
+---
 .docker:
   image: jobtomelabs/dind-bash:20.10
-  services: [ "docker:20-dind" ]
-  before_script:
-    - echo "Wait for Docker daemon at tcp://localhost:2375"
-    - while ! nc -z localhost 2375; do sleep 0.1; done # Wait until docker socket is available
 
+  services: ["docker:20-dind"]
+
+  before_script:
+    - echo "Waiting for Docker Daemon at tcp://localhost:2375 .."
+    - while ! nc -z localhost 2375; do sleep 0.1; done # Wait until Docker Socket is available
+    - echo "Done."
 
 variables:
   DOCKER_BUILDKIT: 1
   COMPOSE_DOCKER_CLI_BUILD: 1
 
-# This is a base template to build docker multi-stage images.
-# It doesn't include `only` section to allow customizing it using `rules` (a more generic and powerful way to define conditional runs)
-# See this: https://docs.gitlab.com/ee/ci/yaml/#rules
 .docker:build:multi:base:
   extends: .docker
+
   stage: build
+
   script:
-    # compose base docker image name
+    # Compose Base Docker Image Name
     - |
       if [ ! -z "$CI_COMMIT_TAG" ]; then
-          # release build
-          DOCKER_IMAGE_NAME=$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
-          # todo: do we want to override the latest in this case?
-          DOCKER_IMAGE_NAME_LATEST=$CI_REGISTRY_IMAGE:latest
+        # Release Build
+        DOCKER_IMAGE_NAME=$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+        # TODO: Do we want to override the latest in this case?
+        DOCKER_IMAGE_NAME_LATEST=$CI_REGISTRY_IMAGE:latest
       else
-          if [ "$CI_COMMIT_REF_SLUG" == "master" ]; then
-              DOCKER_IMAGE_NAME=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
-              DOCKER_IMAGE_NAME_LATEST=$CI_REGISTRY_IMAGE:latest
-          else
-              # branch build
-              DOCKER_IMAGE_NAME=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHORT_SHA
-              DOCKER_IMAGE_NAME_LATEST=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:latest
-          fi
+        if [ "$CI_COMMIT_REF_SLUG" == "master" ]; then
+          DOCKER_IMAGE_NAME=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+          DOCKER_IMAGE_NAME_LATEST=$CI_REGISTRY_IMAGE:latest
+        else
+          # Branch Build
+          DOCKER_IMAGE_NAME=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHORT_SHA
+          DOCKER_IMAGE_NAME_LATEST=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:latest
+        fi
       fi
 
-    # set optional cache from option, see this: https://stackoverflow.com/a/66888649/2102087
+    # Set cache-from Option; See this: https://stackoverflow.com/a/66888649/2102087
     - |
       if [ ! -z "$CACHE_FROM_BASE_IMAGE" ]; then
-          CACHE_FROM_OPTION=--build-arg=base_image=$CACHE_FROM_BASE_IMAGE
+        CACHE_FROM_OPTION=--build-arg=base_image=$CACHE_FROM_BASE_IMAGE
       else
-          if [ ! -z "$CACHE_FROM" ]; then
-              CACHE_FROM_OPTION=--build-arg=base_image=$DOCKER_IMAGE_NAME-$CACHE_FROM
-          fi
+        if [ ! -z "$CACHE_FROM" ]; then
+          CACHE_FROM_OPTION=--build-arg=base_image=$DOCKER_IMAGE_NAME-$CACHE_FROM
+        fi
       fi
 
-    # append optional tag suffix
+    # Append Optional Tag Suffix
     - |
       if [ ! -z "$IMAGE_TAG_SUFFIX" ]; then
-          # append tag suffix
-          DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME-$IMAGE_TAG_SUFFIX
-          DOCKER_IMAGE_NAME_LATEST=$DOCKER_IMAGE_NAME_LATEST-$IMAGE_TAG_SUFFIX
+        DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME-$IMAGE_TAG_SUFFIX
+        DOCKER_IMAGE_NAME_LATEST=$DOCKER_IMAGE_NAME_LATEST-$IMAGE_TAG_SUFFIX
       fi
 
-    # set build target (default is "prod")
+    # Set Build Target (Default: "prod")
     - |
       if [ -z "$BUILD_TARGET" ]; then
-          BUILD_TARGET=prod
+        BUILD_TARGET=prod
       fi
 
-    # login, build image and push the tags
+    # Login, Build Image and Push Tags
     - echo -n $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
     - docker build --target $BUILD_TARGET $CACHE_FROM_OPTION -t $DOCKER_IMAGE_NAME -t $DOCKER_IMAGE_NAME_LATEST .
     - docker push $DOCKER_IMAGE_NAME
     - docker push $DOCKER_IMAGE_NAME_LATEST
 
-# This is a template to build docker multi-stage images with the `only` section defined.
-# It is here for use
 .docker:build:multi:
   extends: .docker:build:multi:base
+
   only:
     - merge_requests
     - tags

@@ -1,19 +1,34 @@
+---
 include:
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.21.0/docker.yml'
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.21.0/templates/cloudrun.yml'
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.22.0/docker.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.22.0/templates/cloudrun.yml"
 
 deploy:quality:
   extends: .cloudrun:deploy
+
   variables:
-    GOOGLE_KEY: ${GOOGLE_KEY_QUALITY}
-    CI_COMMIT_TAG: ${CI_COMMIT_SHORT_SHA}
     ENVIRONMENT: quality
-    CLUSTER_NAME: ${CLUSTER_NAME_QUALITY}
-    CLUSTER_ZONE: ${CLUSTER_ZONE_QUALITY}
-    ENV: ${ENV_QUALITY}
-    DOMAIN: "${SERVICE_NAME}.${NAMESPACE}.example.com"
-    SECRET_YAML: "${SECRET_YAML_QUALITY}"
-    CONFIGMAP_PATH: "${CONFIGMAP_PATH_QUALITY}"
+    DOMAIN: ${DOMAIN_QUALITY}
+
+    GOOGLE_PROJECT: ${GOOGLE_PROJECT_QUALITY}
+    REGION: ${REGION_QUALITY}
+    GOOGLE_KEY: ${GOOGLE_KEY_QUALITY}
+    SERVICE_NAME: ${SERVICE_NAME_QUALITY}
+    PLATFORM: ${PLATFORM_QUALITY}
+    GAR_IMAGE: ${GAR_IMAGE_QUALITY}
+    IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
+
+    SERVICE_ACCOUNT: ${SERVICE_ACCOUNT_QUALITY}
+    CONNECTIVITY: ${CONNECTIVITY_QUALITY}
+    TIMEOUT: ${TIMEOUT_QUALITY}
+    CONCURRENCY: ${CONCURRENCY_QUALITY}
+    CPU: ${CPU_QUALITY}
+    MEMORY: ${MEMORY_QUALITY}
+    MAX_INSTANCES: ${MAX_INSTANCES_QUALITY}
+    ENV_FILE_PATH: ${ENV_FILE_PATH_QUALITY}
+    SECRETS: ${SECRETS_QUALITY}
+    INGRESS: ${INGRESS_QUALITY}
+
   only:
     - master
     - /^qa.+$/i

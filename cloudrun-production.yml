@@ -1,17 +1,34 @@
+---
 include:
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.21.0/cloudrun-quality.yml'
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.22.0/docker.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.22.0/templates/cloudrun.yml"
 
 deploy:production:
-  extends: deploy:quality
+  extends: .cloudrun:deploy
+
   variables:
-    GOOGLE_KEY: ${GOOGLE_KEY_PRODUCTION}
     ENVIRONMENT: production
-    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION}
-    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION}
-    ENV: ${ENV_PRODUCTION}
-    DOMAIN: "${SERVICE_NAME}.${NAMESPACE}.example.com"
-    SECRET_YAML: "${SECRET_YAML_PRODUCTION}"
-    CONFIGMAP_PATH: "${CONFIGMAP_PATH_PRODUCTION}"
+    DOMAIN: ${DOMAIN_PRODUCTION}
+
+    GOOGLE_PROJECT: ${GOOGLE_PROJECT_PRODUCTION}
+    REGION: ${REGION_PRODUCTION}
+    GOOGLE_KEY: ${GOOGLE_KEY_PRODUCTION}
+    SERVICE_NAME: ${SERVICE_NAME_PRODUCTION}
+    PLATFORM: ${PLATFORM_PRODUCTION}
+    GAR_IMAGE: ${GAR_IMAGE_PRODUCTION}
+    IMAGE_TAG: ${CI_COMMIT_TAG}
+
+    SERVICE_ACCOUNT: ${SERVICE_ACCOUNT_PRODUCTION}
+    CONNECTIVITY: ${CONNECTIVITY_PRODUCTION}
+    TIMEOUT: ${TIMEOUT_PRODUCTION}
+    CONCURRENCY: ${CONCURRENCY_PRODUCTION}
+    CPU: ${CPU_PRODUCTION}
+    MEMORY: ${MEMORY_PRODUCTION}
+    MAX_INSTANCES: ${MAX_INSTANCES_PRODUCTION}
+    ENV_FILE_PATH: ${ENV_FILE_PATH_PRODUCTION}
+    SECRETS: ${SECRETS_PRODUCTION}
+    INGRESS: ${INGRESS_PRODUCTION}
+
   only:
     - /^v.+$/i
   except:
