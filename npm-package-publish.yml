@@ -1,0 +1,13 @@
+---
+include:
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/feat/npm-package-publish/templates/npm-package-publish.yml"
+
+npm-package:publish:
+  extends: .npm-package:publish
+
+  stage: publish
+
+  image: "${CI_REGISTRY_IMAGE}/${PACKAGES_PUBLISH_IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}"
+
+  only:
+      - /^v.+$/i
