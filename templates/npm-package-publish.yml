@@ -1,3 +1,4 @@
+---
 .npm-package:publish:
     script:
       - cd ${PACKAGES_PUBLISH_WORKDIR}
