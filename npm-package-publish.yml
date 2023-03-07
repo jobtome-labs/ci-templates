@@ -8,6 +8,9 @@ npm-package:publish:
   stage: publish
 
   image: "${CI_REGISTRY_IMAGE}/${PACKAGES_PUBLISH_IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}"
-
+  
+  parallel:
+    matrix:
+      - PACKAGE_NAME: []
   only:
       - /^v.+$/i
