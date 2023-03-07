@@ -1,6 +1,6 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/feat/npm-package-publish/templates/npm-package-publish.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.24.0/templates/npm-package-publish.yml"
 
 npm-package:publish:
   extends: .npm-package:publish
@@ -12,5 +12,6 @@ npm-package:publish:
   parallel:
     matrix:
       - PACKAGE_NAME: []
+
   only:
       - /^v.+$/i
