@@ -1,0 +1,9 @@
+---
+.npm-package:publish:
+    script:
+      - cd ${PACKAGES_PUBLISH_WORKDIR}
+      - pnpm config set @${PACKAGES_GROUP}:registry https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/
+      - pnpm config set -- 'https://g${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/:_authToken' "${CI_JOB_TOKEN}"
+      - echo "//${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${CI_JOB_TOKEN}">.npmrc
+      - cd ${PACKAGES_PUBLISH_WORKDIR}/packages/${PACKAGE_NAME}
+      - pnpm publish --no-git-checks --verbose
