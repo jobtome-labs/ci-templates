@@ -336,7 +336,15 @@
 
       LAST_RELEASE_IMAGE_TAG=$(helm get values "${APP_NAME}" | yq eval-all ".image.tag" -)
 
-      BASE_COMMAND=( helm diff upgrade "${APP_NAME}" "current-repo/${CHART_NAME}" --version="${CHART_VERSION}" --values="/tmp/values.yaml" --set="image.tag=${LAST_RELEASE_IMAGE_TAG}" --namespace="${NAMESPACE}" --allow-unreleased --normalize-manifests --show-secrets=false )
+      if [ -f "${HELM_FILES_PATH}/app-secrets.yaml" ]; then
+        echo "Application Secrets Detected (at Path \"${HELM_FILES_PATH}/app-secrets.yaml\")."
+        echo "${SOPS_KEY}" > /tmp/sops.json
+        GOOGLE_APPLICATION_CREDENTIALS=/tmp/sops.json sops --decrypt "${HELM_FILES_PATH}/app-secrets.yaml" > /tmp/secret-values.yaml
+        BASE_COMMAND=( helm diff upgrade "${APP_NAME}" "current-repo/${CHART_NAME}" --version="${CHART_VERSION}" --values="/tmp/values.yaml" --values="/tmp/secret-values.yaml" --set="image.tag=${LAST_RELEASE_IMAGE_TAG}" --namespace="${NAMESPACE}" --allow-unreleased --normalize-manifests --show-secrets=false )
+      else
+        echo "No Application Secrets Detected (at Path \"${HELM_FILES_PATH}/app-secrets.yaml\")."
+        BASE_COMMAND=( helm diff upgrade "${APP_NAME}" "current-repo/${CHART_NAME}" --version="${CHART_VERSION}" --values="/tmp/values.yaml" --set="image.tag=${LAST_RELEASE_IMAGE_TAG}" --namespace="${NAMESPACE}" --allow-unreleased --normalize-manifests --show-secrets=false )
+      fi
 
       COMMAND_DIFF_LONG=( ${BASE_COMMAND[@]} --output=diff )
       COMMAND_DIFF_SHORT=( ${BASE_COMMAND[@]} --output=diff --context=3 )
