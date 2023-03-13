@@ -1,9 +1,6 @@
 include:
   - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.24.0/templates/docker.yml"
 
-variables:
-  DOCKER_BUILD_JOB_RETRY: 0
-
 build:
   stage: build
   extends: .docker
@@ -134,7 +131,7 @@ build:
     variables:
       - $SKIP_CI_BUILD == "true"
 
-  retry: ${DOCKER_BUILD_JOB_RETRY}
+  retry: 1
 
 build:cache:
   stage: build
