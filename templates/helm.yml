@@ -1,7 +1,4 @@
 ---
-variables:
-  HELM_DEPLOY_JOB_RETRY: 0
-
 .helm:
   image: jobtomelabs/helm:v3.8.1
 
@@ -198,7 +195,7 @@ variables:
 
       fi
 
-  retry: ${HELM_DEPLOY_JOB_RETRY}
+  retry: 1
 
 .deploy:quality:helm:
   extends: .helm:deploy
