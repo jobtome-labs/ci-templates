@@ -4,6 +4,7 @@ include:
 
 deploy:production:helm:
   extends: .deploy:production:helm
+
   variables:
     GOOGLE_KEY: ${GOOGLE_KEY_PRODUCTION}
     CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION}
@@ -13,36 +14,73 @@ deploy:production:helm:
     NAMESPACE: ${NAMESPACE_PRODUCTION}
     ENVIRONMENT: production
     ENVIRONMENT_NAME: production
+
   before_script:
     - |
+
       # CHECK VARIABLES PHASE
+
       for var in "GOOGLE_KEY_PRODUCTION" "CLUSTER_NAME_PRODUCTION" "CLUSTER_ZONE_PRODUCTION" "NAMESPACE_PRODUCTION" "DOMAIN_PRODUCTION"; do
-          if [ -z "${!var}" ]; then
-            echo "Missing '${var}' Variable!"
-            exit 1
-          fi
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
       done
 
   resource_group: production
 
 verify:production:
   extends: .verify
+
   stage: verify
+
   variables:
     GOOGLE_KEY: ${GOOGLE_KEY_PRODUCTION}
     CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION}
     CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION}
     NAMESPACE: ${NAMESPACE_PRODUCTION}
+
   before_script:
     - |
+
       # CHECK VARIABLES PHASE
+
       for var in "GOOGLE_KEY_PRODUCTION" "CLUSTER_NAME_PRODUCTION" "CLUSTER_ZONE_PRODUCTION" "NAMESPACE_PRODUCTION"; do
-          if [ -z "${!var}" ]; then
-            echo "Missing '${var}' Variable!"
-            exit 1
-          fi
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
       done
+
   only:
     - /^v.+$/i
   except:
     - branches
+
+helm:diff:production:
+  extends: .helm:diff
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_PRODUCTION}
+    CLUSTER_NAME: ${CLUSTER_NAME_PRODUCTION}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_PRODUCTION}
+    DOMAIN: ${DOMAIN_PRODUCTION}
+    SECRET_YAML: ${SECRET_YAML_PRODUCTION}
+    NAMESPACE: ${NAMESPACE_PRODUCTION}
+    ENVIRONMENT: production
+    ENVIRONMENT_NAME: production
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_PRODUCTION" "CLUSTER_NAME_PRODUCTION" "CLUSTER_ZONE_PRODUCTION" "NAMESPACE_PRODUCTION" "DOMAIN_PRODUCTION"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  rules:
+    - if: '$ENABLE_HELM_DIFF == "true" && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'

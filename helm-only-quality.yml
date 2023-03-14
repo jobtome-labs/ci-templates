@@ -20,10 +20,10 @@ deploy:quality:helm:
     - |
       # CHECK VARIABLES PHASE
       for var in "GOOGLE_KEY_QUALITY" "CLUSTER_NAME_QUALITY" "CLUSTER_ZONE_QUALITY" "NAMESPACE_QUALITY" "DOMAIN_QUALITY"; do
-          if [ -z "${!var}" ]; then
-            echo "Missing '${var}' Variable!"
-            exit 1
-          fi
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
       done
 
   resource_group: quality
@@ -47,12 +47,41 @@ verify:quality:
     - |
       # CHECK VARIABLES PHASE
       for var in "GOOGLE_KEY_QUALITY" "CLUSTER_NAME_QUALITY" "CLUSTER_ZONE_QUALITY" "NAMESPACE_QUALITY"; do
-          if [ -z "${!var}" ]; then
-            echo "Missing '${var}' Variable!"
-            exit 1
-          fi
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
       done
 
   only:
     - master
     - /^qa.+$/i
+
+helm:diff:quality:
+  extends: .helm:diff
+
+  variables:
+    CI_COMMIT_TAG: ${CI_COMMIT_SHORT_SHA}
+    GOOGLE_KEY: ${GOOGLE_KEY_QUALITY}
+    CLUSTER_NAME: ${CLUSTER_NAME_QUALITY}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_QUALITY}
+    DOMAIN: ${DOMAIN_QUALITY}
+    SECRET_YAML: ${SECRET_YAML_QUALITY}
+    NAMESPACE: ${NAMESPACE_QUALITY}
+    ENVIRONMENT: quality
+    ENVIRONMENT_NAME: quality
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_QUALITY" "CLUSTER_NAME_QUALITY" "CLUSTER_ZONE_QUALITY" "NAMESPACE_QUALITY" "DOMAIN_QUALITY"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  rules:
+    - if: '$ENABLE_HELM_DIFF == "true" && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
