@@ -1,6 +1,6 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.26.0/templates/helm.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.27.0/templates/helm.yml"
 
 deploy:internal:helm:
   extends: .deploy:internal:helm
@@ -56,3 +56,31 @@ verify:internal:
     - /^v.+$/i
   except:
     - branches
+
+helm:diff:internal:
+  extends: .helm:diff
+
+  variables:
+    GOOGLE_KEY: ${GOOGLE_KEY_INTERNAL}
+    CLUSTER_NAME: ${CLUSTER_NAME_INTERNAL}
+    CLUSTER_ZONE: ${CLUSTER_ZONE_INTERNAL}
+    DOMAIN: ${DOMAIN_INTERNAL}
+    SECRET_YAML: ${SECRET_YAML_INTERNAL}
+    NAMESPACE: ${NAMESPACE_INTERNAL}
+    ENVIRONMENT: internal
+    ENVIRONMENT_NAME: internal
+
+  before_script:
+    - |
+
+      # CHECK VARIABLES PHASE
+
+      for var in "GOOGLE_KEY_INTERNAL" "CLUSTER_NAME_INTERNAL" "CLUSTER_ZONE_INTERNAL" "NAMESPACE_INTERNAL" "DOMAIN_INTERNAL"; do
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
+      done
+
+  rules:
+    - if: '$ENABLE_HELM_DIFF == "true" && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
