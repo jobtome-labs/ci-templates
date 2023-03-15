@@ -1,6 +1,6 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.27.0/templates/npm-package-publish.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.27.1/templates/npm-package-publish.yml"
 
 npm-package:publish:
   extends: .npm-package:publish

@@ -1,6 +1,6 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.27.0/helm-only-quality.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.27.1/helm-only-quality.yml"
 
 deploy:production:helm:
   extends: .deploy:production:helm
@@ -83,4 +83,4 @@ helm:diff:production:
       done
 
   rules:
-    - if: '$ENABLE_HELM_DIFF == "true" && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+    - if: '($ENABLE_HELM_DIFF == "true") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && (($CI_PIPELINE_SOURCE == "merge_request_event") || ($CI_PIPELINE_SOURCE == "parent_pipeline"))'
