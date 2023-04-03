@@ -1,36 +1,30 @@
-deploy:quality:helm:branches:
+---
+deploy:review-app:helm:
   image: jobtomelabs/helm:v3.8.1
+
   stage: deploy
-  environment:
-    name: review/$CI_BUILD_REF_NAME
-    url: https://${CI_COMMIT_REF_SLUG}.${DOMAIN_QUALITY}
-    on_stop: stop:quality
+
   variables:
     GOOGLE_KEY: ${GOOGLE_KEY_QUALITY}
     CLUSTER_NAME: ${CLUSTER_NAME_QUALITY}
     CLUSTER_ZONE: ${CLUSTER_ZONE_QUALITY}
     NAMESPACE: ${NAMESPACE_QUALITY}
-    ENVIRONMENT: feature
     CI_COMMIT_TAG: ${CI_COMMIT_SHORT_SHA}
+
   script:
-    ###
-    # customisable params:
-    # APP_NAME_BRANCH      (pilots APP_NAME; default CI_COMMIT_SHORT_SHA)
-    # DOMAIN_BRANCH        (pilots DOMAIN; default ${CI_COMMIT_REF_SLUG}.${DOMAIN_QUALITY}
-    # SECRET_BRANCH        (pilots SECRET_YAML; default SECRET_YAML_FEATURE)
-    # SECRET_BRANCH_SOPS   (pilots SECRET_FILE; default ${HELM_DIR}/${ENVIRONMENT}/secrets.yaml)
-    # DATABASE_NAME_BRANCH (pilots DB_NAME_FEAT; default DB_HOST which comes from SECRET_YAML_QUALITY
-    #  \_____________ OR in case of no DB_HOST,  default *comes from* URL_BRANCH 'disassembled', which comes from SECRET_YAML)
-    ###
-    - &dbcheckvars |
-      # CHECK VARIABLES PHASE
+    - &check_variables |
+
+      # CHECKING VARIABLES PHASE
+
       for var in "GOOGLE_KEY_QUALITY" "CLUSTER_NAME_QUALITY" "CLUSTER_ZONE_QUALITY" "NAMESPACE_QUALITY"; do
-          if [ -z "${!var}" ]; then
-            echo "Missing '${var}' variable!"
-            exit 1
-          fi
+        if [ -z "${!var}" ]; then
+          echo "Missing '${var}' Variable!"
+          exit 1
+        fi
       done
-    - &dbactivate |
+
+    - &activate |
+
       # ACTIVATION PHASE
 
       echo "${GOOGLE_KEY}" > /tmp/key.json
@@ -40,9 +34,11 @@ deploy:quality:helm:branches:
       gcloud config set project "${GOOGLE_PROJECT}"
 
       echo
-      echo "-> Google project '${GOOGLE_PROJECT}' configured!"
+      echo "-> Google Project '${GOOGLE_PROJECT}' Configured."
       echo
-    - &dbclusterconnect |
+
+    - &connect |
+
       # CLUSTER CONNECTION PHASE
 
       gcloud container clusters get-credentials --zone "${CLUSTER_ZONE}" "${CLUSTER_NAME}"
@@ -50,298 +46,178 @@ deploy:quality:helm:branches:
       kubectl config set-context $(kubectl config current-context) --namespace="${NAMESPACE}"
 
       echo
-      echo "-> Namespace '$(kubectl config view --minify --output jsonpath={..namespace})' configured!"
+      echo "-> Namespace '$(kubectl config view --minify --output jsonpath={..namespace})' Configured."
       echo
       kubectl cluster-info
       echo
 
-    - |
-      # DOMAIN OPERATIONS
-      # use a specific domain if DOMAIN_BRANCH is specified in gitlab-ci
-      if [ -n "${DOMAIN_BRANCH}" ]; then
-        export DOMAIN=${CI_COMMIT_REF_SLUG}.${DOMAIN_BRANCH}
-      # otherwise, use default DOMAIN_QUALITY
+    - &init_variables |
+
+      # INITIALIZE VARIABLES
+
+      if [ -n "${DOMAIN_REVIEW_APP}" ]; then
+        export DOMAIN=${DOMAIN_REVIEW_APP}
       else
-        export DOMAIN=${CI_COMMIT_REF_SLUG}.${DOMAIN_QUALITY}
+        export DOMAIN=${CI_MERGE_REQUEST_ID}.${DOMAIN_QUALITY}
       fi
 
-    - &dbfindname |
-      # use a specific app name if APP_NAME_BRANCH is specified in gitlab-ci
-      if [ -n "${APP_NAME_BRANCH}" ]; then
-        export APP_NAME=${APP_NAME_BRANCH}
-      # otherwise, use default APP_NAME (i.e. COMMIT_REF_SLUG)
+      echo
+      echo "-> DOMAIN '${DOMAIN}'"
+      echo
+
+      if [ -n "${APP_NAME_REVIEW_APP}" ]; then
+        export APP_NAME=${APP_NAME_REVIEW_APP}
       else
-        export APP_NAME=${CI_COMMIT_REF_SLUG}
+        export APP_NAME=${APP_NAME}-${CI_MERGE_REQUEST_ID}
       fi
 
-    - &dbhelmdir |
-      # CHECK DIRS AND CREATE VALUES
+      echo
+      echo "-> APP_NAME '${APP_NAME}'"
+      echo
+
+    - &environment |
+
+      # CHECK PATHS
+
       if [ -z "${HELM_DIR}" ]; then
         HELM_DIR=helm
       fi
 
-      HELM_FILES_PATH="${HELM_DIR}/${ENVIRONMENT}"
-      envsubst < "${HELM_FILES_PATH}"/values.yaml > /tmp/values.yaml
+      HELM_FILES_PATH="${HELM_DIR}/review-app"
 
-    - &dbsecretid |
-      # SECRETS OPERATIONS: Identification
-      # we need SECRET_YAML_QUALITY to perform DB cloning
-      # (it contains quality DB name, whereas SECRET_YAML should
-      # contain the new name i.e. the name of the feature branch)
-
-      # use a specific CI/CD variable if SECRET_BRANCH is specified in gitlab-ci
-      if [ -n "${SECRET_BRANCH}" ]; then
-        SECRET_YAML=${!SECRET_BRANCH}
-      # otherwise, use default SECRET_YAML_FEATURE CI/CD variable
-      else
-        SECRET_YAML=${SECRET_YAML_FEATURE}
+      if [ -n "${ENVIRONMENT_REVIEW_APP}" ]; then
+        HELM_FILES_PATH="${HELM_DIR}/${ENVIRONMENT_REVIEW_APP}"
       fi
 
-    - |
-      # Set kubectl command to delete
-      KUBECTL_COMMAND=( kubectl apply -f /tmp/secrets.yaml )
-
-    - &dbkubectlsecret |
-      # SECRETS OPERATIONS: application
-      # Priority: file in repo, then SECRET_YAML
-
-      if [ -n "${SECRET_BRANCH_SOPS}" ]; then
-        SECRET_FILE=${!SECRET_BRANCH_SOPS}
-      # otherwise, use default SECRET_YAML_FEATURE CI/CD variable
-      else
-        SECRET_FILE=${HELM_FILES_PATH}/secrets.yaml
-      fi
-
-      if [ ! -f "${SECRET_FILE}" ] && [ -z "${SECRET_YAML}" ]; then
-        echo
-        echo "-> [WARN] No secret to apply!"
-        echo
-      else
-        touch /tmp/secrets.yaml
-
-        if [ -f "${SECRET_FILE}" ]; then
-          if [ -z "${SOPS_KEY}" ] || [ -z "${SOPS_CONF}" ]; then
-            echo "[WARN] Cannot apply secrets: missing sops key or conf"
-          else
-            echo "${SOPS_CONF}" > /tmp/.sops.yaml
-            echo "${SOPS_KEY}" > /tmp/sops.json
-            GOOGLE_APPLICATION_CREDENTIALS=/tmp/sops.json sops --config /tmp/.sops.yaml -d "${SECRET_FILE}" > /tmp/secrets.yaml
-          fi
-        fi
-
-        if [ -n "${SECRET_YAML}" ]; then
-          echo "${SECRET_YAML}" | base64 -d >> /tmp/secrets.yaml
-        fi
-
-        envsubst < /tmp/secrets.yaml > /tmp/secrets.yaml.tmp && mv /tmp/secrets.yaml.tmp /tmp/secrets.yaml
-
-        "${KUBECTL_COMMAND[@]}"
+      if [ -d "${HELM_FILES_PATH}" ]; then
 
         echo
-        echo "-> Secrets deployed!"
+        echo "-> Getting Values from Location '${HELM_FILES_PATH}'."
         echo
-      fi
-
-    - &dbsecretunmangling |
-      # SECRETS OPERATIONS: unmangling
-
-      # We have this from above
-      set +e
-      BRANCH_VARS=$( tac /tmp/secrets.yaml | grep -e "DB_USERNAME" -e "DB_PASSWORD" -e "DB_HOST" -e "DB_NAME" -e "DATABASE_URL" | base64)
-      set -e
-
-      # It is assumed that the quality secret cannot be missing in a feature branch
-      touch /tmp/secrets-qa.yaml
-
-      if [ -f "${HELM_DIR}/quality/secrets.yaml" ]; then
-        if [ -z "${SOPS_KEY}" ] || [ -z "${SOPS_CONF}" ]; then
-          echo "[WARN] Cannot apply secrets: missing sops key or conf"
-        else
-          echo "${SOPS_CONF}" > /tmp/.sops.yaml
-          echo "${SOPS_KEY}" > /tmp/sops.json
-          GOOGLE_APPLICATION_CREDENTIALS=/tmp/sops.json sops --config /tmp/.sops.yaml -d "${HELM_DIR}/quality/secrets.yaml" > /tmp/secrets-qa.yaml
-        fi
-      fi
-
-      if [ -n "${SECRET_YAML_QUALITY}" ]; then
-        echo "${SECRET_YAML_QUALITY}" | base64 -d >> /tmp/secrets-qa.yaml
-      fi
-
-      envsubst < /tmp/secrets-qa.yaml > /tmp/secrets-qa.yaml.tmp && mv /tmp/secrets-qa.yaml.tmp /tmp/secrets-qa.yaml
-
-      set +e
-      QUALITY_VARS=$( tac /tmp/secrets-qa.yaml | grep -e "DB_USERNAME" -e "DB_PASSWORD" -e "DB_HOST" -e "DB_NAME" -e "DATABASE_URL" | base64)
-      set -e
-
-    - |
-      # Define db operations (three)
-      set +e
-      DB_OP_ONE="mysql -u\$DB_USERNAME -p\$DB_PASSWORD -h\$DB_HOST -e \"USE \$DB_NAME_ORIGIN\""
-      DB_OP_TWO="mysql -u\$DB_USERNAME -p\$DB_PASSWORD -h\$DB_HOST -e \"CREATE DATABASE IF NOT EXISTS \$DB_NAME_FEAT\""
-      DB_OP_THREE="mysqldump -u\$DB_USERNAME -p\$DB_PASSWORD -h\$DB_HOST \$DB_NAME_ORIGIN --opt --single-transaction --skip-add-locks"
-      DB_OP_PIPED="mysql -u\$DB_USERNAME -p\$DB_PASSWORD -h\$DB_HOST --max_allowed_packet=32M \$DB_NAME_FEAT"
-      OPERATION="Cloning"
-      set -e
-
-    - &dboperations |
-      # CLONE DB phase
-      # the db parameters could be in two formats:
-      # - all parameters stored in different variables (DB_USER, DB_PASS, DB_HOST...)
-      # - url schema: everything is into a string, stored in a variable DATABASE_URL
-      # if it's the second case, we turn everything into 'single variables' extracting from the url schema
-      # url schema MUST be complete: `protocol://user:pass@host:port/name`
-
-      echo "-> Finding parameters "
-      set +e
-      URL_QA=$( echo $QUALITY_VARS | base64 -d | grep -m1 DATABASE_URL | awk '{ print $2}' | base64 -d )
-      set -e
-      if [ -z "${URL_QA}" ]; then
-        echo "-> empty \$URL_QA, proceeding to get all parameters singularly"
-        set +e
-        # Take user, pass, and host from the secret
-        export DB_USERNAME=$( echo $QUALITY_VARS | base64 -d | grep -m1 DB_USERNAME | awk '{ print $2}' | base64 -d )
-        export DB_PASSWORD=$( echo $QUALITY_VARS | base64 -d | grep -m1 DB_PASSWORD | awk '{ print $2}' | base64 -d )
-        export DB_HOST=$( echo $QUALITY_VARS | base64 -d | grep -m1 DB_HOST | awk '{ print $2}' | base64 -d )
-        export DB_NAME_ORIGIN=$( echo $QUALITY_VARS | base64 -d | grep -m1 DB_NAME | awk '{ print $2}' | base64 -d )
-        set -e
-      else
-        echo "-> Extracting params from \$URL_QA"
-        set +e
-        export DB_USERNAME=$( echo $URL_QA | awk -F [\/:@?] '{print $4}')
-        export DB_PASSWORD=$( echo $URL_QA | awk -F [\/:@?] '{print $5}')
-        export DB_HOST=$( echo $URL_QA | awk -F [\/:@?] '{print $6}')
-        export DB_NAME_ORIGIN=$( echo $URL_QA | awk -F [\/:@?] '{print $8}')
-        set -e
-      fi
-
-      echo "checking if needed params are there!"
-      for var in "DB_USERNAME" "DB_PASSWORD" "DB_HOST" "DB_NAME_ORIGIN"; do
-        if [ -z "${!var}" ]; then
-          echo "-> Missing both '${var}' variable or/and DATABASE_URL! Not proceeding with DB cloning"
-          no_db=1
-        fi
-      done
-
-      if [ -z "${no_db}" ]; then
-        if [ -n "${DATABASE_NAME_BRANCH}" ]; then
-          export DB_NAME_FEAT=$DATABASE_NAME_BRANCH
-        else
-          set +e
-          export DB_NAME_FEAT=$( echo $BRANCH_VARS | base64 -d | grep -m1 DB_NAME | awk '{ print $2}' | base64 -d )
-          set -e
-          if [ -z "${DB_NAME_FEAT}" ]; then
-            # if the secret does not have DB_NAME, it means we only have the url schema way
-            URL_BRANCH=$( echo $BRANCH_VARS | base64 -d | grep -m1 DATABASE_URL | awk '{ print $2}' | base64 -d )
-            export DB_NAME_FEAT=$( echo $URL_BRANCH | awk -F [\/:@?] '{print $8}')
-          fi
-        fi
-
-        echo
-        echo "-> ${OPERATION} db "
-        echo
-
-        eval "${DB_OP_ONE[@]}" || { echo 'DB login failed! Please check credentials' ; exit 1; }
-        eval "${DB_OP_TWO[@]}" || { echo 'DB creation failed! Please check user permission, must have CREATE, REFERENCES and DROP' ; exit 1; }
-        eval "${DB_OP_THREE[@]}" | eval "${DB_OP_PIPED[@]}" || { echo 'DB cloning failed!' ; exit 1; }
 
       else
+
         echo
-        echo "-> [Warning] Some variables are missing. Cannot proceed to import db"
+        echo "-> [ERROR] Unable to find Values at Location '${HELM_FILES_PATH}'."
+        echo "-> [ERROR] Invalid Directory Path."
         echo
+
+        exit 1
+
       fi
 
-    - |
-      # HELM APPLICATION
-      helm repo add current-repo "${CHARTS_URL}"
+      envsubst < "${HELM_FILES_PATH}/values.yaml" > /tmp/values.yaml
+
+    - &helm_chart_setup |
+
+      # HELM CHART SETUP
+
+      helm repo add jobtome "${CHARTS_URL}"
       helm repo update
 
       echo
-      helm search repo current-repo/"${CHART_NAME}"
+      helm search repo "jobtome/${CHART_NAME}"
       echo
 
-      echo "Chart version - ${CHART_VERSION}"
-
       if [ -z "${CHART_VERSION}" ]; then
-        CHART_VERSION=$(helm search repo current-repo/"${CHART_NAME}" | tail -n 1 | awk '{print $2}')
+        CHART_VERSION=$(helm search repo "jobtome/${CHART_NAME}" | tail -n 1 | awk '{print $2}')
       fi
+
+      echo "-> Chart Version '${CHART_VERSION}'"
 
       if [ -z "${TIMEOUT}" ]; then
         TIMEOUT=600s
       fi
 
-    - |
-      cat << EOF > /tmp/replacer.sh
-      #!/bin/bash
-      sed 's/name: "${NAMESPACE}"/name: "${APP_NAME}"/g' | sed 's/-tls/-tls-${APP_NAME}/g' | awk '/deployment.yaml|service.yaml|ingress.yaml|configmap.yaml/,/---/'
-      EOF
+    - &helm_apply |
 
-      chmod 755 /tmp/replacer.sh
+      # HELM INSTALL / UPGRADE
+
+      WAIT="5s"
+
+      helm status "${APP_NAME}" > /dev/null 2>&1 || WAIT="10m"
+
+      if [ -f "${HELM_FILES_PATH}/app-secrets.yaml" ]; then
+
+        echo
+        echo "-> Application Secrets Detected at Path \"${HELM_FILES_PATH}/app-secrets.yaml\"."
+        echo "-> Decrypting and Passing to Helm as Values."
+        echo
+
+        echo "${SOPS_KEY}" > /tmp/sops.json
+
+        GOOGLE_APPLICATION_CREDENTIALS=/tmp/sops.json sops --decrypt "${HELM_FILES_PATH}/app-secrets.yaml" | helm upgrade --install --atomic "${APP_NAME}" "jobtome/${CHART_NAME}" --wait --timeout "${TIMEOUT}" -f /tmp/values.yaml --namespace "${NAMESPACE}" --version ${CHART_VERSION} --values -
+
+      else
+
+        echo
+        echo "-> No Application Secrets Detected at Path \"${HELM_FILES_PATH}/app-secrets.yaml\"."
+        echo "-> Assuming No App Secrets for this Project. Ignore."
+        echo
+
+        helm upgrade --install --atomic "${APP_NAME}" "jobtome/${CHART_NAME}" --wait --timeout "${TIMEOUT}" -f /tmp/values.yaml --namespace "${NAMESPACE}" --version ${CHART_VERSION}
+
+      fi
+
+      if [ $WAIT == "10m" ]; then
+        echo "Seems like it's the First Release."
+        echo "Waiting 10 Minutes for the Google Load Balancer to update .."
+      fi
+
+      sleep $WAIT
 
       echo
-      echo "-> App ${APP_NAME} is going to be released! Chart version is ${CHART_VERSION}"
-      echo "--> This is a feature branch! You can check it at ${DOMAIN}"
+      echo "-> Application '${APP_NAME}' released."
+      echo "-> Current Version is '${CHART_VERSION}'."
       echo
 
-      helm upgrade --install --atomic "${APP_NAME}" "current-repo/${CHART_NAME}" --wait --timeout "${TIMEOUT}" -f /tmp/values.yaml --namespace "${NAMESPACE}" --version ${CHART_VERSION} --post-renderer /tmp/replacer.sh --set ingress.ignoreTest=true --set service.ignoreTest=true
-
-      sleep 5
-
-      echo
-      echo "-> ${APP_NAME} released!"
-      echo
-  only:
-    - merge_requests
-  except:
-    variables:
-      - $CI_COMMIT_REF_NAME !~ /^feat/
-
-stop:quality:
-  image: jobtomelabs/helm:v3.8.1
-  allow_failure: true
   environment:
-    name: review/$CI_BUILD_REF_NAME
-    action: stop
+    name: review/${ENVIRONMENT_NAME_REVIEW_APP}
+    url: https://${DOMAIN_REVIEW_APP}
+    auto_stop_in: 2 weeks
+    on_stop: stop:review-app:helm
+
+  rules:
+    - if: ($ENABLE_REVIEW_APPS == "true") && ($CI_COMMIT_REF_NAME =~ /^review/) && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && (($CI_PIPELINE_SOURCE == "merge_request_event") || ($CI_PIPELINE_SOURCE == "parent_pipeline"))
+
+stop:review-app:helm:
+  image: jobtomelabs/helm:v3.8.1
+
   stage: stop
+
   variables:
     GOOGLE_KEY: ${GOOGLE_KEY_QUALITY}
     CLUSTER_NAME: ${CLUSTER_NAME_QUALITY}
     CLUSTER_ZONE: ${CLUSTER_ZONE_QUALITY}
     NAMESPACE: ${NAMESPACE_QUALITY}
-    ENVIRONMENT: feature
     CI_COMMIT_TAG: ${CI_COMMIT_SHORT_SHA}
+
   script:
-    - *dbcheckvars
-    - *dbactivate
-    - *dbclusterconnect
-    - *dbfindname
-    - *dbhelmdir
-    - *dbsecretid
-    - |
-      # Set kubectl command to delete
-      KUBECTL_COMMAND=( kubectl delete -f /tmp/secrets.yaml )
+    - *check_variables
+    - *activate
+    - *connect
+    - *init_variables
 
-    - *dbkubectlsecret
-    - *dbsecretunmangling
-    - |
-      # Define db operations (two)
-      DB_OP_ONE="mysql -u\$DB_USERNAME -p\$DB_PASSWORD -h\$DB_HOST -e \"USE \$DB_NAME_ORIGIN\""
-      DB_OP_TWO="mysql -u\$DB_USERNAME -p\$DB_PASSWORD -h\$DB_HOST -e \"DROP DATABASE \$DB_NAME_FEAT\""
-      DB_OP_THREE=""
-      DB_OP_PIPED=""
-      OPERATION="Dropping"
+    - &helm_uninstall |
 
-    - *dboperations
-    - |
-      # Uninstall helm release
+      # HELM UNINSTALL
+
       if [ -z "${TIMEOUT}" ]; then
         TIMEOUT=600s
       fi
 
-      helm uninstall "${APP_NAME}" --timeout "${TIMEOUT}" --namespace "${NAMESPACE}"
-    - |
+      helm uninstall "${APP_NAME}" --namespace "${NAMESPACE}" --timeout "${TIMEOUT}"
+
       echo
-      echo "-> Uninstall completed successfully"
+      echo "-> Application '${APP_NAME}' uninstalled successfully."
       echo
+
+  environment:
+    name: review/${ENVIRONMENT_NAME_REVIEW_APP}
+    action: stop
+
   rules:
-    - if: $CI_MERGE_REQUEST_ID && $CI_COMMIT_REF_NAME =~ /^feat/
+    - if: ($ENABLE_REVIEW_APPS == "true") && ($CI_COMMIT_REF_NAME =~ /^review/) && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && (($CI_PIPELINE_SOURCE == "merge_request_event") || ($CI_PIPELINE_SOURCE == "parent_pipeline"))
       when: manual
+
+  allow_failure: true
