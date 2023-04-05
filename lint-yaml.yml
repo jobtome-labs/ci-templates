@@ -1,6 +1,6 @@
 lint:yaml:
   stage: lint
-  image: jobtomelabs/yamllint-reviewdog:v1.0.0
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/yamllint-reviewdog:v1.0.0
   variables:
     GITLAB_API: ${CI_API_V4_URL}
   script:

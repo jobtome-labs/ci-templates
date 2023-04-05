@@ -13,7 +13,7 @@ docker:image:cleanup:env:
 
 docker:image:cleanup:
   stage: stop
-  image: jobtomelabs/docker-registry-cleaner:v1.0.0
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/docker-registry-cleaner:v1.0.0
   variables:
     GITLAB_TOKEN_TYPE: job
     GITLAB_TOKEN: $CI_JOB_TOKEN

@@ -1,6 +1,6 @@
 .deploy:dataflow:
   stage: deploy
-  image: jobtomelabs/sbt-with-gcloud:v1.0.0
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/sbt-with-gcloud:v1.0.0
   script:
     - &connection |
       # CLUSTER CONNECTION PHASE

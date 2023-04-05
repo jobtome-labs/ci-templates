@@ -1,6 +1,6 @@
 ---
 deploy:review-app:helm:
-  image: jobtomelabs/helm:v3.8.1
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/helm:v3.8.1
 
   stage: deploy
 
@@ -181,7 +181,7 @@ deploy:review-app:helm:
     - if: ($ENABLE_REVIEW_APPS == "true") && ($CI_COMMIT_REF_NAME =~ /^review/) && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && (($CI_PIPELINE_SOURCE == "merge_request_event") || ($CI_PIPELINE_SOURCE == "parent_pipeline"))
 
 stop:review-app:helm:
-  image: jobtomelabs/helm:v3.8.1
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/helm:v3.8.1
 
   stage: stop
 

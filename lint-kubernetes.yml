@@ -1,6 +1,6 @@
 lint:kubernetes:
   stage: lint
-  image: garethr/kubeval:0.14.0
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/garethr-kubeval:0.14.0
   script:
     - |
       if [[ "${KUBEVAL_RUN_STRICT}" == "1" ]]; then

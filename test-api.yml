@@ -1,5 +1,5 @@
 test:api:
-  image: jobtomelabs/karate-ci:v1.0.0
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/karate-ci:v1.0.0
   stage: test
   script:
     - |

@@ -1,6 +1,6 @@
 lint:docker:
   stage: lint
-  image: jobtomelabs/hadolint-reviewdog:v1.0.0
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/hadolint-reviewdog:v1.0.0
   script:
     - |
 

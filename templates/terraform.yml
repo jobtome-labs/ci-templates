@@ -6,6 +6,6 @@
     GIT_DEPTH: 1
 
 .terraform-security:
-  image: jobtomelabs/terraform-with-tfsec:v1.0.0
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/terraform-with-tfsec:v1.0.0
   variables:
     GIT_DEPTH: 1

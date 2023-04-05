@@ -1,5 +1,5 @@
 .endpoint:deploy:
-  image: jobtomelabs/ci-image-gcp:v1.0.1
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/ci-image-gcp:v1.0.1
   stage: deploy
   script:
     - &connection |
@@ -33,7 +33,7 @@
       gcloud endpoints services deploy ${ENDPOINT_FILE}
 
 test:endpoint:production:
-  image: jobtomelabs/ci-image-gcp:v1.0.1
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/ci-image-gcp:v1.0.1
   stage: test
   script:
     - *connection

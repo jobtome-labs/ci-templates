@@ -1,5 +1,5 @@
 .serverless:deploy:
-  image: jobtomelabs/ci-image-gcp:v1.5.0
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/ci-image-gcp:v1.5.0
   stage: deploy
   script:
     - &connection |

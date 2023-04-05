@@ -1,9 +1,9 @@
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.28.0/templates/sast.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.29.0/templates/sast.yml"
 
 sast:
   extends: .sast
-  image: jobtomelabs/dind-bash:20.10
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/dind-bash:20.10
   variables:
     DOCKER_DRIVER: overlay2
   before_script:

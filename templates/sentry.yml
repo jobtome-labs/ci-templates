@@ -1,6 +1,6 @@
 ---
 .sentry:
-  image: jobtomelabs/sentry-cli-bash:v1.1.0
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/sentry-cli-bash:v1.1.0
 
   script:
     - &check-set-variables |

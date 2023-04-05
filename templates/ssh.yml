@@ -1,5 +1,5 @@
 .ssh:exec:
-  image: registry.jobtome.io/devops/docker-images/gcloud-sdk:v1.0.4
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/gcloud-sdk:v1.0.4
   stage: deploy
   script:
     - |

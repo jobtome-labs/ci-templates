@@ -1,6 +1,6 @@
 lint:python:
   stage: lint
-  image: jobtomelabs/pythonlinter-reviewdog:v1.0.0
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/pythonlinter-reviewdog:v1.0.0
   script:
     - |
 
