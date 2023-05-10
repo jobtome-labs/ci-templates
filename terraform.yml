@@ -1,22 +1,30 @@
+---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.29.2/templates/terraform.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.30.0/templates/terraform.yml"
 
 cache:
   key: ${CI_PIPELINE_ID}
+
   paths:
     - "${TF_FOLDER_PATH}/.terraform"
 
 validate:
   extends: .terraform
+
   stage: test
+
   script:
     - &check |
       if [ -n "${TF_FOLDER_PATH}" ]; then
         cd "${TF_FOLDER_PATH}"
       fi
+
       terraform --version
+
     - terraform init -backend=false
+
     - terraform validate
+
   only:
     - /^v.+$/i
     - master
@@ -24,19 +32,25 @@ validate:
 
 plan:
   extends: .terraform
+
   stage: build
+
   script:
     - *check
+
     - &init |
       terraform init
+
     - |
       if [ "${DISABLE_TERRAFORM_REFRESH_STATE}" != "true" ]; then
         terraform apply -refresh-only -auto-approve
       fi
+
     - |
       TEXT_BOLD="\e[1m" && TEXT_LIGHT_YELLOW="\e[93m" && TEXT_RESET="\e[0m"
 
       terraform plan -out=plan.tfplan | tee operation
+
       if ( $(grep '[1-9]\d* to destroy' operation > /dev/null) ); then
         echo -e ""
         echo -e "${TEXT_BOLD}${TEXT_LIGHT_YELLOW}─────────────────────────────────────────────────────────────────────────────${TEXT_RESET}"
@@ -58,10 +72,12 @@ plan:
         echo -e "${TEXT_BOLD}${TEXT_LIGHT_YELLOW}─────────────────────────────────────────────────────────────────────────────${TEXT_RESET}"
         echo -e ""
       fi
+
   artifacts:
     name: plan
     paths:
       - "${TF_FOLDER_PATH}/plan.tfplan"
+
   only:
     - /^v.+$/i
     - master
@@ -71,17 +87,25 @@ plan:
 
 apply:
   extends: .terraform
+
   stage: deploy
-  script:
-    - *check
-    - *init
-    - terraform apply -input=false plan.tfplan
+
   dependencies:
     - plan
+
+  script:
+    - *check
+
+    - *init
+
+    - terraform apply -input=false plan.tfplan
+
   when: manual
+
   only:
     - /^v.+$/i
   except:
     - branches
+
   environment:
     name: production

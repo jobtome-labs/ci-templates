@@ -1,19 +1,21 @@
-# The following is commented because it is already included by terraform.yml
-# and most often you want to include terraform along with security
-# include:
-#   - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.29.2/templates/terraform.yml'
-
+---
 test:terraform-security:
   extends: .terraform-security
+
   stage: test
+
   script:
     - |
       if [ -n "${TF_FOLDER_PATH}" ]; then
         cd "${TF_FOLDER_PATH}"
       fi
+
       terraform --version
+
       terraform init -backend=false
+
       tfsec .
+
   only:
     - /^v.+$/i
     - master

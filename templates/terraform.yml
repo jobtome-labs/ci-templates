@@ -1,11 +1,14 @@
+---
 .terraform:
   image:
-    name: hashicorp/terraform:1.0.0
+    name: hashicorp/terraform:1.4.6
     entrypoint: [""]
+
   variables:
     GIT_DEPTH: 1
 
 .terraform-security:
-  image: europe-west1-docker.pkg.dev/jobtome-platform/public/terraform-with-tfsec:v1.0.0
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/tfsec-tf1.4.6:v1.28.1
+
   variables:
     GIT_DEPTH: 1
