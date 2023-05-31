@@ -1,5 +1,5 @@
 include:
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.30.0/serverless-quality.yml'
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.31.0/serverless-quality.yml'
 
 # EUROPE
 deploy:production:europe:
@@ -14,6 +14,7 @@ deploy:production:europe:
     TRIGGER_TOPIC: ${TRIGGER_TOPIC_PRODUCTION_EUROPE}
     SECRET_YAML: ${SECRET_YAML_PRODUCTION_EUROPE}
     SECRET_ENV_LIST: ${SECRET_ENV_LIST_PRODUCTION_EUROPE}
+    SECRET_MGR_LIST: ${SECRET_MGR_LIST_PRODUCTION_EUROPE}
   before_script:
     - |
       # CHECK VARIABLES PHASE
@@ -41,6 +42,7 @@ deploy:production:america:
     TRIGGER_TOPIC: ${TRIGGER_TOPIC_PRODUCTION_AMERICA}
     SECRET_YAML: ${SECRET_YAML_PRODUCTION_AMERICA}
     SECRET_ENV_LIST: ${SECRET_ENV_LIST_PRODUCTION_AMERICA}
+    SECRET_MGR_LIST: ${SECRET_MGR_LIST_PRODUCTION_AMERICA}
   before_script:
     - |
       # CHECK VARIABLES PHASE
@@ -68,6 +70,7 @@ deploy:production:asia:
     TRIGGER_TOPIC: ${TRIGGER_TOPIC_PRODUCTION_ASIA}
     SECRET_YAML: ${SECRET_YAML_PRODUCTION_ASIA}
     SECRET_ENV_LIST: ${SECRET_ENV_LIST_PRODUCTION_ASIA}
+    SECRET_MGR_LIST: ${SECRET_MGR_LIST_PRODUCTION_ASIA}
   before_script:
     - |
       # CHECK VARIABLES PHASE

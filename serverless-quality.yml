@@ -1,5 +1,5 @@
 include:
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.30.0/templates/serverless.yml'
+  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.31.0/templates/serverless.yml'
 
 deploy:quality:
   extends: .serverless:deploy
@@ -11,6 +11,7 @@ deploy:quality:
     DOMAIN: ${DOMAIN_QUALITY}
     SECRET_YAML: ${SECRET_YAML_QUALITY}
     SECRET_ENV_LIST: ${SECRET_ENV_LIST_QUALITY}
+    SECRET_MGR_LIST: ${SECRET_MGR_LIST_QUALITY}
     TRIGGER_TOPIC: ${TRIGGER_TOPIC_QUALITY}
     ENVIRONMENT: quality
   before_script:
@@ -25,4 +26,3 @@ deploy:quality:
   only:
     - master
     - /^qa.+$/i
-

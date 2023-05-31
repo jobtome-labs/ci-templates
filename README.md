@@ -85,37 +85,43 @@ Terraform:
 
 According to the operation / the type of pipeline you have to perform, you can pick here different stages, and put the snippet as indicated in your `.gitlab-ci.yml`:
 
-- [Linting](#linting)
-- Tests
-  - [Docker-compose tests](#unit-test-stage)
-  - [API tests](#api-test-stage)
-- [Docker pipeline](#docker-pipeline)
-  - Build
-  - Test for image vulnerabilities
-  - Push to registry
-- Kubernetes deployment
-  - [Deploy on quality (a.k.a. staging)](#kubernetes-quality-pipeline)
-  - [Regional deployment](#kubernetes-regional-pipeline)
-  - [Multi-regional deployment](#kubernetes-multiregion-pipeline)
-  - ["Simple script" execution](#kubernetes-"simple-script"-pipeline)
-  - [Note on configmaps](#note-on-configmaps)
-- [Helm deployment](#helm-deployment)
-- [Helm chart publishing](#helm-chart-publishing)
-- [SSH command](#ssh-command)
-- [Publishing on calendar](#publish-to-google-calendar-and-slack)
-- [Google bucket upload](#deploy-to-google-storage)
-- Serverless functions deployment
-  - [Quality deployment](#google-function-quality-pipeline)
-  - [Regional deployment](#google-function-regional-pipeline)
-  - [Multi-regional deployment](#google-function-multiregion-pipeline)
-- [Google endpoint](#google-endpoint)
-- Google cloud run
-  - [Quality pipeline](#google-cloud-run-quality)
-  - [Production pipeline](#google-cloud-run-production)
-- [Google dataflow](#dataflow)
-- [Terraform pipeline](#terraform-pipeline)
-- [Terraform security check](#terraform-security-score)
-- [Notify sentry of release](#notify-sentry-of-release)
+- [Default CI templates](#default-ci-templates)
+  - [Pipeline order and workflow](#pipeline-order-and-workflow)
+    - [Folder structure](#folder-structure)
+    - [Underlying versions](#underlying-versions)
+    - [Index of how-tos](#index-of-how-tos)
+    - [How to use it](#how-to-use-it)
+  - [Linting](#linting)
+    - [Linting shell files](#linting-shell-files)
+    - [Linting python files](#linting-python-files)
+- [Unit test stage](#unit-test-stage)
+- [API test stage](#api-test-stage)
+  - [Docker pipeline](#docker-pipeline)
+    - [Alternative multi-stage build / caching](#alternative-multi-stage-build--caching)
+  - [Kubernetes quality pipeline](#kubernetes-quality-pipeline)
+  - [Kubernetes regional pipeline](#kubernetes-regional-pipeline)
+  - [Kubernetes multiregion pipeline](#kubernetes-multiregion-pipeline)
+    - [Note on configmaps](#note-on-configmaps)
+    - [Note on secrets](#note-on-secrets)
+  - [Kubernetes run script quality](#kubernetes-run-script-quality)
+  - [Kubernetes run script production](#kubernetes-run-script-production)
+  - [Helm deployment](#helm-deployment)
+    - [Helm chart publishing](#helm-chart-publishing)
+  - [SSH command](#ssh-command)
+  - [Publish to Google Calendar and Slack](#publish-to-google-calendar-and-slack)
+  - [Deploy to Google Storage](#deploy-to-google-storage)
+  - [Google function quality pipeline](#google-function-quality-pipeline)
+  - [Google function regional pipeline](#google-function-regional-pipeline)
+  - [Google function multiregion pipeline](#google-function-multiregion-pipeline)
+  - [Google endpoint](#google-endpoint)
+  - [Google Cloud Run Quality](#google-cloud-run-quality)
+  - [Google Cloud Run Production](#google-cloud-run-production)
+  - [Google Dataflow](#google-dataflow)
+  - [Terraform pipeline](#terraform-pipeline)
+  - [Terraform security score](#terraform-security-score)
+  - [Bash script execution](#bash-script-execution)
+  - [Notify sentry of release](#notify-sentry-of-release)
+- [General advices](#general-advices)
 
 Finally some [advice](#general-advices) on how to try the pipeline (for development).
 
@@ -853,6 +859,7 @@ variables:
   DOMAIN_QUALITY: https://us-central1.cloudfunctions.net/http_function
   SECRET_YAML_QUALITY: <secret base64 encoded>
   SECRET_ENV_LIST_QUALITY: "SUPERSECRET=env"
+  SECRET_MGR_LIST_QUALITY: "[SECRET_ENV_VAR=SECRET_VALUE_REF,/secret_path=SECRET_VALUE_REF,/mount_path:/secret_file_path=SECRET_VALUE_REF,…]"
 ```
 
 ## Google function regional pipeline
@@ -880,6 +887,7 @@ variables:
   DOMAIN_QUALITY: https://us-central1.cloudfunctions.net/http_function
   SECRET_YAML_QUALITY: <secret base64 encoded>
   SECRET_ENV_LIST_QUALITY: "SUPERSECRET=env"
+  SECRET_MGR_LIST_QUALITY: "[SECRET_ENV_VAR=SECRET_VALUE_REF,/secret_path=SECRET_VALUE_REF,/mount_path:/secret_file_path=SECRET_VALUE_REF,…]"
 
   # PRODUCTION VARIABLES
   SERVICE_ACCOUNT_PRODUCTION: default
@@ -890,6 +898,7 @@ variables:
   DOMAIN_PRODUCTION: https://us-central1.cloudfunctions.net/http_function
   SECRET_YAML_PRODUCTION: <secret base64 encoded>
   SECRET_ENV_LIST_PRODUCTION: "SUPERSECRET=env"
+  SECRET_MGR_LIST_PRODUCTION: "[SECRET_ENV_VAR=SECRET_VALUE_REF,/secret_path=SECRET_VALUE_REF,/mount_path:/secret_file_path=SECRET_VALUE_REF,…]"
 ```
 
 ## Google function multiregion pipeline
@@ -917,6 +926,7 @@ variables:
   DOMAIN_QUALITY: https://us-central1.cloudfunctions.net/http_function
   SECRET_YAML_QUALITY: <secret base64 encoded>
   SECRET_ENV_LIST_QUALITY: "SUPERSECRET=env"
+  SECRET_MGR_LIST_QUALITY: "[SECRET_ENV_VAR=SECRET_VALUE_REF,/secret_path=SECRET_VALUE_REF,/mount_path:/secret_file_path=SECRET_VALUE_REF,…]"
 
   # PRODUCTION EUROPE VARIABLES
   SERVICE_ACCOUNT_PRODUCTION_EUROPE: default
@@ -927,6 +937,7 @@ variables:
   DOMAIN_PRODUCTION_EUROPE: https://europe-west1.cloudfunctions.net/http_function
   SECRET_YAML_PRODUCTION_EUROPE: <secret base64 encoded>
   SECRET_ENV_LIST_PRODUCTION_EUROPE: "SUPERSECRET=env"
+  SECRET_MGR_LIST_PRODUCTION_EUROPE: "[SECRET_ENV_VAR=SECRET_VALUE_REF,/secret_path=SECRET_VALUE_REF,/mount_path:/secret_file_path=SECRET_VALUE_REF,…]"
 
   # PRODUCTION AMERICA VARIABLES
   SERVICE_ACCOUNT_PRODUCTION_AMERICA: default
@@ -937,6 +948,7 @@ variables:
   DOMAIN_PRODUCTION_AMERICA: https://us-central1.cloudfunctions.net/http_function
   SECRET_YAML_PRODUCTION_AMERICA: <secret base64 encoded>
   SECRET_ENV_LIST_PRODUCTION_AMERICA: "SUPERSECRET=env"
+  SECRET_MGR_LIST_PRODUCTION_AMERICA: "[SECRET_ENV_VAR=SECRET_VALUE_REF,/secret_path=SECRET_VALUE_REF,/mount_path:/secret_file_path=SECRET_VALUE_REF,…]"
 
   # PRODUCTION ASIA VARIABLES
   SERVICE_ACCOUNT_PRODUCTION_ASIA: default
@@ -947,6 +959,7 @@ variables:
   DOMAIN_PRODUCTION_ASIA: https://asia-east2.cloudfunctions.net/http_function
   SECRET_YAML_PRODUCTION_ASIA: <secret base64 encoded>
   SECRET_ENV_LIST_PRODUCTION_ASIA: "SUPERSECRET=env"
+  SECRET_MGR_LIST_PRODUCTION_ASIA: "[SECRET_ENV_VAR=SECRET_VALUE_REF,/secret_path=SECRET_VALUE_REF,/mount_path:/secret_file_path=SECRET_VALUE_REF,…]"
 ```
 
 ## Google endpoint
