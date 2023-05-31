@@ -77,6 +77,14 @@
         COMMAND_TO_RUN+=( --set-env-vars=${SECRET_ENV_LIST} )
       fi
 
+      if [ -n "${SECRET_MGR_LIST}" ]; then
+        echo
+        echo "-> Setting secrets!"
+        echo
+
+        COMMAND_TO_RUN+=( --set-secrets=${SECRET_MGR_LIST} )
+      fi
+
       if [ -n "${ENTRYPOINT}" ]; then
         echo
         echo "-> Setting entrypoint!"
