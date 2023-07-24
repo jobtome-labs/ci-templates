@@ -44,13 +44,13 @@ helm:publish:
 
       BUCKET_FULL_PATH="gs:/$(echo "/${BUCKET_NAME}/${BUCKET_PATH}/" | tr -s /)"
 
-      "${COMMAND_TO_RUN[@]} cp ${BUCKET_FULL_PATH}index.yaml /tmp/index.yaml"
+      "${COMMAND_TO_RUN[@]}" cp ${BUCKET_FULL_PATH}index.yaml /tmp/index.yaml
 
       helm package .
       helm repo index . --merge /tmp/index.yaml
 
-      "${COMMAND_TO_RUN[@]} cp ./index.yaml ${BUCKET_FULL_PATH}index.yaml"
-      "${COMMAND_TO_RUN[@]} cp ./*.tgz* ${BUCKET_FULL_PATH}"
+      "${COMMAND_TO_RUN[@]}" cp ./index.yaml ${BUCKET_FULL_PATH}index.yaml
+      "${COMMAND_TO_RUN[@]}" cp ./*.tgz* ${BUCKET_FULL_PATH}
   only:
     - /^v.+$/i
   except:
