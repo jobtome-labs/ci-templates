@@ -1,6 +1,6 @@
 ---
 .endpoints:
-  image: europe-west1-docker.pkg.dev/jobtome-platform/public/ci-image-gcp:v1.4.0
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/ci-image-gcp:v1.6.0
 
 .endpoints:connect:
   extends: .endpoints

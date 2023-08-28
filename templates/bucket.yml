@@ -1,5 +1,5 @@
 .deploy:
-  image: europe-west1-docker.pkg.dev/jobtome-platform/public/ci-image-gcp:v1.0.1
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/ci-image-gcp:v1.6.0
   stage: deploy
   script:
     - &connection |

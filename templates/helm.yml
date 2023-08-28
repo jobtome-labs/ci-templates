@@ -1,6 +1,6 @@
 ---
 .helm:
-  image: europe-west1-docker.pkg.dev/jobtome-platform/public/helm:v3.8.1
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/helm:v3.12.3
 
 .helm:deploy:
   extends: .helm

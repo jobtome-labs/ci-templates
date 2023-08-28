@@ -1,6 +1,6 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.31.1/endpoints-quality.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.32.0/endpoints-quality.yml"
 
 endpoints:validate:production:
   extends: .endpoints:validate
