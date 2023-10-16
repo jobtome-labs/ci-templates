@@ -38,7 +38,7 @@ publish:slack:
         "author_name": "${GITLAB_USER_LOGIN}",
         "title": "${CI_PROJECT_NAME} ${CI_COMMIT_TAG}",
         "title_link": "${CI_PIPELINE_URL}",
-        "text": "$(cat /tmp/msg.txt)",
+        "text": "$(cat /tmp/msg.txt | sed 's/"/\\"/g')",
         "fields": [
           {
             "title": "Completed at:",
