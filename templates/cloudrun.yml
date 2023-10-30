@@ -120,6 +120,14 @@
         COMMAND_TO_RUN+=( --ingress ${INGRESS} )
       fi
 
+      if [ -n "${EXTRA_FLAGS}" ]; then
+        echo
+        echo "-> Setting additional flags!"
+        echo
+
+        COMMAND_TO_RUN+=( ${EXTRA_FLAGS} )
+      fi
+
       STATUS=0
 
       ${COMMAND_TO_RUN[@]} || STATUS=1

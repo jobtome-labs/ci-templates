@@ -1,6 +1,6 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.32.1/templates/terraform.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.33.0/templates/terraform.yml"
 
 cache:
   key: ${CI_PIPELINE_ID}
