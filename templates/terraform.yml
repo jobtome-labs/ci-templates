@@ -8,7 +8,7 @@
     GIT_DEPTH: 1
 
 .terraform-security:
-  image: europe-west1-docker.pkg.dev/jobtome-platform/public/aquasec/tfsec-ci:v1.28.4
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/tfsec-tf1.6.3:v1.28.4
 
   variables:
     GIT_DEPTH: 1
