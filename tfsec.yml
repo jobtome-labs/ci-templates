@@ -1,0 +1,35 @@
+---
+include:
+  - remote: https://raw.githubusercontent.com/jobtome-labs/ci-templates/chore/terraform-tofu-compatibility/templates/tfsec.yml
+
+tfsec:security:scan:
+  extends: .tfsec
+
+  stage: security
+
+  variables:
+    DEFAULT_IAC_TOOL_BINARY: "tofu"
+
+  script:
+    - |
+      if [ -n "${IAC_TOOL_BINARY}" ]; then
+        IAC_TOOL_BINARY=${DEFAULT_IAC_TOOL_BINARY}
+      fi
+
+      alias t="${IAC_TOOL_BINARY}"
+
+    - |
+      if [ -n "${CONFIG_FOLDER_PATH}" ]; then
+        cd "${CONFIG_FOLDER_PATH}"
+      fi
+
+    - t version
+
+    - t init -backend=false
+
+    - tfsec .
+
+  only:
+    - /^v.+$/i
+    - master
+    - merge_requests
