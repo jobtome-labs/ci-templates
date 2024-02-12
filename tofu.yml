@@ -1,0 +1,109 @@
+---
+include:
+  - remote: https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.35.0/templates/tofu.yml
+
+cache:
+  key: ${CI_PIPELINE_ID}
+
+  paths:
+    - "${CONFIG_FOLDER_PATH}/.terraform"
+
+tofu:validate:
+  extends: .tofu
+
+  stage: test
+
+  script:
+    - &check |
+      if [ -n "${CONFIG_FOLDER_PATH}" ]; then
+        cd "${CONFIG_FOLDER_PATH}"
+      fi
+
+    - tofu --version
+
+    - tofu init -backend=false
+
+    - tofu validate
+
+  only:
+    - /^v.+$/i
+    - master
+    - merge_requests
+
+tofu:format:check:
+  extends: .tofu
+
+  stage: test
+
+  script:
+    - *check
+
+    - tofu --version
+
+    - tofu init -backend=false
+
+    - tofu fmt -recursive -check
+
+  allow_failure: true
+
+  only:
+    - /^v.+$/i
+    - master
+    - merge_requests
+
+tofu:plan:
+  extends: .tofu
+
+  stage: build
+
+  script:
+    - *check
+
+    - tofu init
+
+    - |
+      if [ "${DISABLE_TOFU_REFRESH_STATE}" != "true" ]; then
+        tofu apply -refresh-only -auto-approve
+      fi
+
+    - tofu plan -out=main.tfplan
+
+  artifacts:
+    name: plan
+
+    paths:
+      - "${CONFIG_FOLDER_PATH}/main.tfplan"
+
+  only:
+    - /^v.+$/i
+    - master
+    - merge_requests
+
+  except:
+    - branches
+
+tofu:apply:
+  extends: .tofu
+
+  stage: deploy
+
+  dependencies:
+    - tofu:plan
+
+  script:
+    - *check
+
+    - tofu init
+
+    - tofu apply -input=false main.tfplan
+
+  when: manual
+
+  environment:
+    name: production
+
+  only:
+    - /^v.+$/i
+
+  except:
+    - branches
