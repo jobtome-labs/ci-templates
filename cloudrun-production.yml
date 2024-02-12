@@ -1,7 +1,7 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.34.1/docker.yml"
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.34.1/templates/cloudrun.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/chore/terraform-tofu-compatibility/docker.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/chore/terraform-tofu-compatibility/templates/cloudrun.yml"
 
 deploy:production:
   extends: .cloudrun:deploy

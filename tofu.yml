@@ -1,6 +1,6 @@
 ---
 include:
-  - remote: https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.34.1/templates/tofu.yml
+  - remote: https://raw.githubusercontent.com/jobtome-labs/ci-templates/chore/terraform-tofu-compatibility/templates/tofu.yml
 
 cache:
   key: ${CI_PIPELINE_ID}
@@ -24,6 +24,23 @@ validate:
     - tofu init -backend=false
 
     - tofu validate
+
+  only:
+    - /^v.+$/i
+    - master
+    - merge_requests
+
+format:check:
+  extends: .tofu
+
+  stage: test
+
+  script:
+    - *check
+
+    - tofu fmt -recursive -check
+
+  allow_failure: true
 
   only:
     - /^v.+$/i
