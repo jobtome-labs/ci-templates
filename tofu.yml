@@ -1,0 +1,114 @@
+---
+include:
+  - remote: https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.34.1/templates/tofu.yml
+
+cache:
+  key: ${CI_PIPELINE_ID}
+
+  paths:
+    - "${TOFU_FOLDER_PATH}/.terraform"
+
+validate:
+  extends: .tofu
+
+  stage: test
+
+  script:
+    - &check |
+      if [ -n "${TOFU_FOLDER_PATH}" ]; then
+        cd "${TOFU_FOLDER_PATH}"
+      fi
+
+    - tofu --version
+
+    - tofu init -backend=false
+
+    - tofu validate
+
+  only:
+    - /^v.+$/i
+    - master
+    - merge_requests
+
+plan:
+  extends: .tofu
+
+  stage: build
+
+  script:
+    - *check
+
+    - &init |
+      tofu init
+
+    - |
+      if [ "${DISABLE_TOFU_REFRESH_STATE}" != "true" ]; then
+        tofu apply -refresh-only -auto-approve
+      fi
+
+    - |
+      TEXT_BOLD="\e[1m" && TEXT_LIGHT_YELLOW="\e[93m" && TEXT_RESET="\e[0m"
+
+      tofu plan -out=plan.tfplan | tee operation
+
+      if ( $(grep '[1-9]\d* to destroy' operation > /dev/null) ); then
+        echo -e ""
+        echo -e "${TEXT_BOLD}${TEXT_LIGHT_YELLOW}─────────────────────────────────────────────────────────────────────────────${TEXT_RESET}"
+        echo -e ""
+        echo -e "${TEXT_BOLD}${TEXT_LIGHT_YELLOW}*****************************************************************************${TEXT_RESET}"
+        echo -e "${TEXT_BOLD}${TEXT_LIGHT_YELLOW}*****************************************************************************${TEXT_RESET}"
+        echo -e "${TEXT_BOLD}${TEXT_LIGHT_YELLOW}*************   __        ___    ____  _   _ ___ _   _  ____    *************${TEXT_RESET}"
+        echo -e "${TEXT_BOLD}${TEXT_LIGHT_YELLOW}*************   \ \      / / \  |  _ \| \ | |_ _| \ | |/ ___|   *************${TEXT_RESET}"
+        echo -e "${TEXT_BOLD}${TEXT_LIGHT_YELLOW}*************    \ \ /\ / / _ \ | |_) |  \| || ||  \| | |  _    *************${TEXT_RESET}"
+        echo -e "${TEXT_BOLD}${TEXT_LIGHT_YELLOW}*************     \ V  V / ___ \|  _ <| |\  || || |\  | |_| |   *************${TEXT_RESET}"
+        echo -e "${TEXT_BOLD}${TEXT_LIGHT_YELLOW}*************      \_/\_/_/   \_\_| \_\_| \_|___|_| \_|\____|   *************${TEXT_RESET}"
+        echo -e "${TEXT_BOLD}${TEXT_LIGHT_YELLOW}*************                                                   *************${TEXT_RESET}"
+        echo -e "${TEXT_BOLD}${TEXT_LIGHT_YELLOW}*****************************************************************************${TEXT_RESET}"
+        echo -e "${TEXT_BOLD}${TEXT_LIGHT_YELLOW}*****************************************************************************${TEXT_RESET}"
+        echo -e ""
+        echo -e "${TEXT_BOLD}${TEXT_LIGHT_YELLOW}This plan, when applied, will delete some resources (see above) !!${TEXT_RESET}"
+        echo -e "${TEXT_BOLD}${TEXT_LIGHT_YELLOW}Double-Review the above plan and ensure it will do what you intended to do before continuing with applying the changes.${TEXT_RESET}"
+        echo -e ""
+        echo -e "${TEXT_BOLD}${TEXT_LIGHT_YELLOW}─────────────────────────────────────────────────────────────────────────────${TEXT_RESET}"
+        echo -e ""
+      fi
+
+  artifacts:
+    name: plan
+
+    paths:
+      - "${TOFU_FOLDER_PATH}/plan.tfplan"
+
+  only:
+    - /^v.+$/i
+    - master
+    - merge_requests
+
+  except:
+    - branches
+
+apply:
+  extends: .tofu
+
+  stage: deploy
+
+  dependencies:
+    - plan
+
+  script:
+    - *check
+
+    - *init
+
+    - tofu apply -input=false plan.tfplan
+
+  when: manual
+
+  only:
+    - /^v.+$/i
+
+  except:
+    - branches
+
+  environment:
+    name: production
