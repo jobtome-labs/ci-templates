@@ -1,6 +1,6 @@
 ---
 include:
-  - remote: https://raw.githubusercontent.com/jobtome-labs/ci-templates/chore/terraform-tofu-compatibility/templates/tfsec.yml
+  - remote: https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.35.0/templates/tfsec.yml
 
 tfsec:security:scan:
   extends: .tfsec
