@@ -12,7 +12,8 @@ build:
     - |
       # NPM CACHE
       if [ "${USE_NPM_CACHE}" == "true" ]; then
-        cp -r /npmcache ./npmcache
+        cp -v -r /npmcache "${CI_PROJECT_DIR}/"
+        echo "Copied npmcache."
       fi
 
     - |
@@ -148,7 +149,8 @@ build:cache:
     - |
       # NPM CACHE
       if [ "${USE_NPM_CACHE}" == "true" ]; then
-        cp -r /npmcache ./npmcache
+        cp -v -r /npmcache "${CI_PROJECT_DIR}/"
+        echo "Copied npmcache."
       fi
 
     - |
@@ -249,7 +251,8 @@ build:latest:
     - |
       # NPM CACHE
       if [ "${USE_NPM_CACHE}" == "true" ]; then
-        cp -r /npmcache ./npmcache
+        cp -v -r /npmcache "${CI_PROJECT_DIR}/"
+        echo "Copied npmcache."
       fi
 
     - |
