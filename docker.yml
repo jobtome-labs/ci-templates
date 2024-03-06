@@ -19,6 +19,10 @@ build:
     - |
       # DOCKER BUILD PHASE
 
+      echo *******************************
+      ls -la .
+      echo *******************************
+
       DOCKER_CONTEXT_PATH="."
 
       if [ -n "${DOCKER_CONTEXT}" ]; then
@@ -156,6 +160,10 @@ build:cache:
     - |
       # DOCKER BUILD PHASE
 
+      echo *******************************
+      ls -la .
+      echo *******************************
+
       DOCKER_CONTEXT_PATH="."
 
       if [ -n "${DOCKER_CONTEXT}" ]; then
@@ -257,6 +265,10 @@ build:latest:
 
     - |
       # DOCKER BUILD PHASE
+
+      echo *******************************
+      ls -la .
+      echo *******************************
 
       DOCKER_CONTEXT_PATH="."
 
