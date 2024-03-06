@@ -10,6 +10,12 @@ build:
       echo -n "${CI_REGISTRY_PASSWORD}" | docker login -u "${CI_REGISTRY_USER}" --password-stdin "${CI_REGISTRY}"
 
     - |
+      # NPM CACHE
+      if [ "${USE_NPM_CACHE}" == "true" ]; then
+        cp -r /npmcache ./npmcache
+      fi
+
+    - |
       # DOCKER BUILD PHASE
 
       DOCKER_CONTEXT_PATH="."
@@ -138,6 +144,13 @@ build:cache:
   extends: .docker
   script:
     - *connection
+
+    - |
+      # NPM CACHE
+      if [ "${USE_NPM_CACHE}" == "true" ]; then
+        cp -r /npmcache ./npmcache
+      fi
+
     - |
       # DOCKER BUILD PHASE
 
@@ -232,6 +245,13 @@ build:latest:
   extends: .docker
   script:
     - *connection
+
+    - |
+      # NPM CACHE
+      if [ "${USE_NPM_CACHE}" == "true" ]; then
+        cp -r /npmcache ./npmcache
+      fi
+
     - |
       # DOCKER BUILD PHASE
 
