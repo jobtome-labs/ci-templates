@@ -9,12 +9,10 @@ build:
       # DOCKER LOGIN PHASE
       echo -n "${CI_REGISTRY_PASSWORD}" | docker login -u "${CI_REGISTRY_USER}" --password-stdin "${CI_REGISTRY}"
 
-    # - |
-    #   # NPM CACHE
-    #   if [ "${USE_NPM_CACHE}" == "true" ]; then
-    #     cp -v -r /npmcache "${CI_PROJECT_DIR}/"
-    #     echo "Copied npmcache."
-    #   fi
+    - |
+      # NPM CACHE
+      cp -v -r /npmcache "${CI_PROJECT_DIR}/"
+      echo "Copied npmcache."
 
     - |
       # DOCKER BUILD PHASE
@@ -150,12 +148,10 @@ build:cache:
   script:
     - *connection
 
-    # - |
-    #   # NPM CACHE
-    #   if [ "${USE_NPM_CACHE}" == "true" ]; then
-    #     cp -v -r /npmcache "${CI_PROJECT_DIR}/"
-    #     echo "Copied npmcache."
-    #   fi
+    - |
+      # NPM CACHE
+      cp -v -r /npmcache "${CI_PROJECT_DIR}/"
+      echo "Copied npmcache."
 
     - |
       # DOCKER BUILD PHASE
@@ -256,12 +252,10 @@ build:latest:
   script:
     - *connection
 
-    # - |
-    #   # NPM CACHE
-    #   if [ "${USE_NPM_CACHE}" == "true" ]; then
-    #     cp -v -r /npmcache "${CI_PROJECT_DIR}/"
-    #     echo "Copied npmcache."
-    #   fi
+    - |
+      # NPM CACHE
+      cp -v -r /npmcache "${CI_PROJECT_DIR}/"
+      echo "Copied npmcache."
 
     - |
       # DOCKER BUILD PHASE
