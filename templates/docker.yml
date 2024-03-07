@@ -9,13 +9,6 @@
     - while ! nc -z localhost 2375; do sleep 0.1; done # Wait until Docker Socket is available
     - echo "Done."
 
-    - |
-      # NPM CACHE
-      if [ "${USE_NPM_CACHE}" == "true" ]; then
-        cp -v -r /npmcache "${CI_PROJECT_DIR}/"
-        echo "Copied npmcache."
-      fi
-
 variables:
   DOCKER_BUILDKIT: 1
   COMPOSE_DOCKER_CLI_BUILD: 1

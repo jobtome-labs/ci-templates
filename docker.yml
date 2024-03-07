@@ -11,7 +11,7 @@ build:
 
     - |
       # NPM CACHE
-      cp -v -r /npmcache "${CI_PROJECT_DIR}/"
+      cp -r /npmcache "${CI_PROJECT_DIR}/"
       echo "Copied npmcache."
 
     - |
@@ -150,7 +150,7 @@ build:cache:
 
     - |
       # NPM CACHE
-      cp -v -r /npmcache "${CI_PROJECT_DIR}/"
+      cp -r /npmcache "${CI_PROJECT_DIR}/"
       echo "Copied npmcache."
 
     - |
@@ -254,7 +254,7 @@ build:latest:
 
     - |
       # NPM CACHE
-      cp -v -r /npmcache "${CI_PROJECT_DIR}/"
+      cp -r /npmcache "${CI_PROJECT_DIR}/"
       echo "Copied npmcache."
 
     - |
