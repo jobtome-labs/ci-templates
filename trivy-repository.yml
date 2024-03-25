@@ -1,0 +1,47 @@
+---
+trivy:repository:scan:
+  stage: security
+
+  image: "${CI_REGISTRY_IMAGE}/${TRIVY_REPOSITORY_IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}"
+
+  variables:
+    GIT_STRATEGY: none
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_SCANNERS: "vuln,misconfig,secret,license"
+    TRIVY_CACHE_DIR: "/.trivy-cache/"
+    TRIVY_REPOSITORY_PATH: "."
+
+  script:
+    - trivy version
+
+    - trivy repository --exit-code 0 --format template --template "@/contrib/gitlab.tpl" --output "/gl-repository-scanning-report.json" $TRIVY_REPOSITORY_PATH
+    - trivy repository --exit-code 0 --format template --template "@/contrib/gitlab-codequality.tpl" --output "/gl-codeclimate-repository.json" $TRIVY_REPOSITORY_PATH
+
+    - trivy repository --exit-code 0 $TRIVY_REPOSITORY_PATH
+
+    - trivy repository --exit-code 1 --severity CRITICAL $TRIVY_REPOSITORY_PATH
+
+  cache:
+    paths:
+      - /.trivy-cache/
+
+  artifacts:
+    paths:
+      - /gl-repository-scanning-report.json
+      - /gl-codeclimate-repository.json
+    reports:
+      codequality: /gl-codeclimate-repository.json
+
+  allow_failure: true
+
+  only:
+    - master
+    - main
+    - /^release/?.*$/i
+    - /^v.+$/i
+    - merge_requests
+    - /^qa.+$/i
+  except:
+    variables:
+      - $SKIP_CI_SECURITY == "true"
+      - $CI_FAST_TRACK == "true"
