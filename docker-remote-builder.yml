@@ -1,0 +1,283 @@
+---
+.docker:
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/docker:26.1-cli
+
+  tags:
+    - dtoncu
+
+build:
+  extends: .docker
+
+  stage: build
+
+  tags:
+    - dtoncu
+
+  variables:
+    BUILDX_BUILDER: "buildkitd"
+
+  script:
+    - &docker_login |
+      # DOCKER LOGIN
+      echo -n "${CI_REGISTRY_PASSWORD}" | docker login -u "${CI_REGISTRY_USER}" --password-stdin "${CI_REGISTRY}"
+
+    - &docker_remote_builder_setup |
+      # DOCKER REMOTE BUILDER SETUP
+
+      mkdir -p ~/.docker/buildx/instances/
+      echo '{ "Name": "buildkitd", "Driver": "kubernetes", "Nodes": [ { "Name": "buildkitd", "Endpoint": "kubernetes:///buildkitd?deployment=&kubeconfig=", "DriverOpts": { "namespace": "buildkitd" } } ] }' > ~/.docker/buildx/instances/buildkitd
+
+    - |
+      # DOCKER IMAGE BUILD
+
+      DOCKER_CONTEXT_PATH="."
+
+      if [ -n "${DOCKER_CONTEXT}" ]; then
+        DOCKER_CONTEXT_PATH="$DOCKER_CONTEXT"
+      fi
+
+      if [ -z "${IMAGES}" ]; then
+
+        COMMAND_TO_RUN=( docker buildx build --push )
+
+        if [ -n "${GO_PROXY_URL}" ]; then
+          COMMAND_TO_RUN+=( --build-arg "GOPROXY=${GO_PROXY_URL}" )
+        fi
+
+        if [ -n "${BUILD_ARGS}" ]; then
+          for build_arg in ${BUILD_ARGS}; do
+            COMMAND_TO_RUN+=( --build-arg "${build_arg}" )
+          done
+        fi
+
+        IMAGE_FULL_NAME="${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+
+        PUBLISH_TARGET_BASE_COMMAND_TO_RUN=${COMMAND_TO_RUN[@]}
+
+        COMMAND_TO_RUN+=( -t "${IMAGE_FULL_NAME}" "${DOCKER_CONTEXT_PATH}" )
+
+        "${COMMAND_TO_RUN[@]}"
+
+        if [ -n "${PUBLISH_TARGETS}" ]; then
+          for target in ${PUBLISH_TARGETS}; do
+            TARGET_IMAGE_FULL_NAME="${CI_REGISTRY_IMAGE}/${target}:${CI_COMMIT_SHORT_SHA}"
+            PUBLISH_TARGET_COMMAND_TO_RUN=( ${PUBLISH_TARGET_BASE_COMMAND_TO_RUN[@]} -t "${TARGET_IMAGE_FULL_NAME}" --target "${target}" "${DOCKER_CONTEXT_PATH}" )
+            "${PUBLISH_TARGET_COMMAND_TO_RUN[@]}"
+          done
+        fi
+
+      else
+
+        if [ -z "${DOCKERFILES_DIR}" ]; then
+          DOCKERFILES_DIR=docker
+        fi
+
+        for image in ${IMAGES}; do
+
+          COMMAND_TO_RUN=( docker buildx build --push )
+
+          if [ -n "${GO_PROXY_URL}" ]; then
+            COMMAND_TO_RUN+=( --build-arg "GOPROXY=${GO_PROXY_URL}" )
+          fi
+
+          if [ -n "${BUILD_ARGS}" ]; then
+            for build_arg in ${BUILD_ARGS}; do
+              COMMAND_TO_RUN+=( --build-arg "${build_arg}" )
+            done
+          fi
+
+          IMAGE_FULL_NAME="${CI_REGISTRY_IMAGE}/${image}:${CI_COMMIT_SHORT_SHA}";
+
+          PUBLISH_TARGET_BASE_COMMAND_TO_RUN=${COMMAND_TO_RUN[@]}
+
+          COMMAND_TO_RUN+=( -t "${IMAGE_FULL_NAME}" -f ./"${DOCKERFILES_DIR}/${image}"/Dockerfile "${DOCKER_CONTEXT_PATH}" )
+
+          "${COMMAND_TO_RUN[@]}"
+
+          if [ -n "${PUBLISH_TARGETS}" ]; then
+            for target in ${PUBLISH_TARGETS}; do
+              TARGET_IMAGE_FULL_NAME="${CI_REGISTRY_IMAGE}/${image}/${target}:${CI_COMMIT_SHORT_SHA}"
+              PUBLISH_TARGET_COMMAND_TO_RUN=( ${PUBLISH_TARGET_BASE_COMMAND_TO_RUN[@]} -t "${TARGET_IMAGE_FULL_NAME}" --target "${target}" -f "./${DOCKERFILES_DIR}/${image}/Dockerfile" "${DOCKER_CONTEXT_PATH}" )
+              "${PUBLISH_TARGET_COMMAND_TO_RUN[@]}"
+            done
+          fi
+
+        done
+      fi
+
+  only:
+    - /^v.+$/i
+    - /^qa.+$/i
+    - master
+    - merge_requests
+
+  except:
+    variables:
+      - $SKIP_CI_BUILD == "true"
+
+build:latest:
+  extends: .docker
+
+  stage: build
+
+  tags:
+    - dtoncu
+
+  variables:
+    BUILDX_BUILDER: "buildkitd"
+
+  script:
+    - *docker_login
+
+    - *docker_remote_builder_setup
+
+    - |
+      # DOCKER IMAGE BUILD
+
+      DOCKER_CONTEXT_PATH="."
+
+      if [ -n "${DOCKER_CONTEXT}" ]; then
+        DOCKER_CONTEXT_PATH="$DOCKER_CONTEXT"
+      fi
+
+      if [ -z "${IMAGES}" ]; then
+
+        COMMAND_TO_RUN=( docker buildx build --push )
+
+        if [ -n "${GO_PROXY_URL}" ]; then
+          COMMAND_TO_RUN+=( --build-arg "GOPROXY=${GO_PROXY_URL}" )
+        fi
+
+        if [ -n "${BUILD_ARGS}" ]; then
+          for build_arg in ${BUILD_ARGS}; do
+            COMMAND_TO_RUN+=( --build-arg "${build_arg}" )
+          done
+        fi
+
+        PUBLISH_TARGET_BASE_COMMAND_TO_RUN=${COMMAND_TO_RUN[@]}
+
+        COMMAND_TO_RUN+=( -t "${CI_REGISTRY_IMAGE}":latest "${DOCKER_CONTEXT_PATH}" )
+
+        "${COMMAND_TO_RUN[@]}"
+
+        if [ -n "${PUBLISH_TARGETS}" ]; then
+          if [ "${ENABLE_PUBLISH_TARGETS_LATEST}" == "true" ]; then
+            for target in ${PUBLISH_TARGETS}; do
+              TARGET_IMAGE_FULL_NAME="${CI_REGISTRY_IMAGE}/${target}:latest"
+              PUBLISH_TARGET_COMMAND_TO_RUN=( ${PUBLISH_TARGET_BASE_COMMAND_TO_RUN[@]} -t "${TARGET_IMAGE_FULL_NAME}" --target "${target}" "${DOCKER_CONTEXT_PATH}" )
+              "${PUBLISH_TARGET_COMMAND_TO_RUN[@]}"
+            done
+          fi
+        fi
+
+      else
+
+        if [ -z "${DOCKERFILES_DIR}" ]; then
+          DOCKERFILES_DIR=docker
+        fi
+
+        for image in ${IMAGES}; do
+
+          COMMAND_TO_RUN=( docker buildx build --push )
+
+          if [ -n "${GO_PROXY_URL}" ]; then
+            COMMAND_TO_RUN+=( --build-arg "GOPROXY=${GO_PROXY_URL}" )
+          fi
+
+          if [ -n "${BUILD_ARGS}" ]; then
+            for build_arg in ${BUILD_ARGS}; do
+              COMMAND_TO_RUN+=( --build-arg "${build_arg}" )
+            done
+          fi
+
+          PUBLISH_TARGET_BASE_COMMAND_TO_RUN=${COMMAND_TO_RUN[@]}
+
+          COMMAND_TO_RUN+=( -t "${CI_REGISTRY_IMAGE}/${image}:latest" -f ./"${DOCKERFILES_DIR}/${image}"/Dockerfile "${DOCKER_CONTEXT_PATH}" )
+
+          "${COMMAND_TO_RUN[@]}"
+
+          if [ -n "${PUBLISH_TARGETS}" ]; then
+            if [ "${ENABLE_PUBLISH_TARGETS_LATEST}" == "true" ]; then
+              for target in ${PUBLISH_TARGETS}; do
+                TARGET_IMAGE_FULL_NAME="${CI_REGISTRY_IMAGE}/${image}/${target}:latest"
+                PUBLISH_TARGET_COMMAND_TO_RUN=( ${PUBLISH_TARGET_BASE_COMMAND_TO_RUN[@]} -t "${TARGET_IMAGE_FULL_NAME}" --target "${target}" -f "./${DOCKERFILES_DIR}/${image}/Dockerfile" "${DOCKER_CONTEXT_PATH}" )
+                "${PUBLISH_TARGET_COMMAND_TO_RUN[@]}"
+              done
+            fi
+          fi
+
+        done
+      fi
+
+  only:
+    - /^v.+$/i
+
+  except:
+    refs:
+      - branches
+    variables:
+      - $SKIP_CI_BUILD_LATEST == "true"
+      - $CI_FAST_TRACK == "true"
+
+push:
+  extends: .docker
+
+  stage: push
+
+  tags:
+    - dtoncu
+
+  variables:
+    GIT_STRATEGY: none
+    BUILDX_BUILDER: "buildkitd"
+
+  script:
+    - *docker_login
+
+    - |
+      # DOCKER IMAGE PUSH
+
+      if [ -z "${IMAGES}" ]; then
+        docker pull "${CI_REGISTRY_IMAGE}":"${CI_COMMIT_SHORT_SHA}"
+        docker tag "${CI_REGISTRY_IMAGE}":"${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}":"${CI_COMMIT_TAG}"
+        docker push "${CI_REGISTRY_IMAGE}":"${CI_COMMIT_TAG}"
+
+        if [ -n "${PUBLISH_TARGETS}" ]; then
+          if [ "${ENABLE_PUBLISH_TARGETS_TAG}" == "true" ]; then
+            for target in ${PUBLISH_TARGETS}; do
+              docker pull "${CI_REGISTRY_IMAGE}/${target}:${CI_COMMIT_SHORT_SHA}"
+              docker tag "${CI_REGISTRY_IMAGE}/${target}:${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}/${target}:${CI_COMMIT_TAG}"
+              docker push "${CI_REGISTRY_IMAGE}/${target}:${CI_COMMIT_TAG}"
+            done
+          fi
+        fi
+
+      else
+
+        for image in ${IMAGES}; do
+
+          docker pull "${CI_REGISTRY_IMAGE}"/"${image}":"${CI_COMMIT_SHORT_SHA}"
+          docker tag "${CI_REGISTRY_IMAGE}"/"${image}":"${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}"/"${image}":"${CI_COMMIT_TAG}"
+          docker push "${CI_REGISTRY_IMAGE}"/"${image}":"${CI_COMMIT_TAG}"
+
+          if [ -n "${PUBLISH_TARGETS}" ]; then
+            if [ "${ENABLE_PUBLISH_TARGETS_TAG}" == "true" ]; then
+              for target in ${PUBLISH_TARGETS}; do
+                docker pull "${CI_REGISTRY_IMAGE}/${image}/${target}:${CI_COMMIT_SHORT_SHA}"
+                docker tag "${CI_REGISTRY_IMAGE}/${image}/${target}:${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}/${image}/${target}:${CI_COMMIT_TAG}"
+                docker push "${CI_REGISTRY_IMAGE}/${image}/${target}:${CI_COMMIT_TAG}"
+              done
+            fi
+          fi
+
+        done
+      fi
+
+  only:
+    - /^v.+$/i
+
+  except:
+    refs:
+      - branches
+    variables:
+      - $SKIP_CI_PUSH == "true"
