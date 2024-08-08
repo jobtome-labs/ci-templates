@@ -32,6 +32,13 @@ RUN cosign verify-blob \
 
 FROM alpine:3.19
 
+RUN apk add --no-cache \
+    coreutils \
+    bash \
+    openssl \
+    curl \
+    git
+
 COPY --from=base tofu_amd64.apk .
 
 RUN apk add --allow-untrusted tofu_amd64.apk
