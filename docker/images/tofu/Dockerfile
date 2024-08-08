@@ -2,9 +2,10 @@
 
 FROM alpine:3.19 AS base
 
-ARG TOFU_VERSION=1.6.1
+ARG TOFU_VERSION=1.8.1
 
 RUN apk add --no-cache \
+    coreutils \
     bash \
     openssl \
     curl \
@@ -24,7 +25,7 @@ RUN mv tofu_${TOFU_VERSION}_amd64.apk tofu_amd64.apk
 RUN cosign verify-blob \
     --signature tofu_${TOFU_VERSION}_SHA256SUMS.sig \
     --certificate tofu_${TOFU_VERSION}_SHA256SUMS.pem \
-    --certificate-identity https://github.com/opentofu/opentofu/.github/workflows/release.yml@refs/heads/v1.6 \
+    --certificate-identity https://github.com/opentofu/opentofu/.github/workflows/release.yml@refs/heads/v$(echo ${TOFU_VERSION} | cut -d . -f 3 --complement) \
     --certificate-oidc-issuer https://token.actions.githubusercontent.com \
     tofu_${TOFU_VERSION}_SHA256SUMS
 
