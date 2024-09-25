@@ -9,6 +9,7 @@ lint:
 
   variables:
     GIT_STRATEGY: none
+    APP_LINT_COMMAND: ">&2 echo 'ERROR: APP_LINT_COMMAND Variable not set. Please set the Linting Command to be executed by this Job.' ; exit 1"
 
   script:
-    - echo "<RUN_LINTING_COMMAND>"
+    - eval "${APP_LINT_COMMAND}"
