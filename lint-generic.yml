@@ -19,3 +19,4 @@ lint:
       fi
 
     - eval "${COMMAND}"
+
