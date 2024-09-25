@@ -9,7 +9,13 @@ prettier:
 
   variables:
     GIT_STRATEGY: none
-    APP_PRETTIER_COMMAND: ">&2 echo 'ERROR: APP_PRETTIER_COMMAND Variable not set. Please set the Prettier Command to be executed by this Job.' ; exit 1"
+    APP_PRETTIER_COMMAND_DEFAULT: ">&2 echo 'ERROR: APP_PRETTIER_COMMAND Variable not set. Please set the Prettier Command to be executed by this Job.' ; exit 1"
 
   script:
-    - eval "${APP_PRETTIER_COMMAND}"
+    - COMMAND="${APP_PRETTIER_COMMAND_DEFAULT}"
+
+      if [ -n "${APP_PRETTIER_COMMAND}" ]; then
+        COMMAND="${APP_PRETTIER_COMMAND}"
+      fi
+
+      eval "${COMMAND}"
