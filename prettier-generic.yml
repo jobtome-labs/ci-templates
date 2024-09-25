@@ -1,0 +1,15 @@
+---
+include:
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.36.0/templates/prettier.yml"
+
+prettier:
+  extends: .prettier
+
+  image: "${CI_REGISTRY_IMAGE}/${APP_PRETTIER_IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}"
+
+  variables:
+    GIT_STRATEGY: none
+    APP_PRETTIER_COMMAND: ">&2 echo 'ERROR: APP_PRETTIER_COMMAND Variable not set. Please set the Prettier Command to be executed by this Job.' ; exit 1"
+
+  script:
+    - eval "${APP_PRETTIER_COMMAND}"

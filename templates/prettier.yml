@@ -1,0 +1,15 @@
+---
+.prettier:
+  stage: test
+
+  only:
+    - master
+    - main
+    - /^release/?.*$/i
+    - /^v.+$/i
+    - merge_requests
+    - /^qa.+$/i
+  except:
+    variables:
+      - $SKIP_CI_TEST == "true"
+      - $CI_FAST_TRACK == "true"
