@@ -1,6 +1,6 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.37.0/templates/sentry.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.37.1/templates/sentry.yml"
 
 sentry:release:set:
   extends: .sentry:release:set
