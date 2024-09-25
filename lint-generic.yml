@@ -14,8 +14,8 @@ lint:
   script:
     - COMMAND="${APP_LINT_COMMAND_DEFAULT}"
 
-      if [ -n "${APP_LINT_COMMAND}" ]; then
+    - if [ -n "${APP_LINT_COMMAND}" ]; then
         COMMAND="${APP_LINT_COMMAND}"
       fi
 
-      eval "${COMMAND}"
+    - eval "${COMMAND}"

@@ -14,8 +14,8 @@ prettier:
   script:
     - COMMAND="${APP_PRETTIER_COMMAND_DEFAULT}"
 
-      if [ -n "${APP_PRETTIER_COMMAND}" ]; then
+    - if [ -n "${APP_PRETTIER_COMMAND}" ]; then
         COMMAND="${APP_PRETTIER_COMMAND}"
       fi
 
-      eval "${COMMAND}"
+    - eval "${COMMAND}"
