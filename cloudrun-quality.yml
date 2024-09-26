@@ -1,7 +1,7 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.37.1/docker.yml"
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.37.1/templates/cloudrun.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.37.2/docker.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.37.2/templates/cloudrun.yml"
 
 deploy:quality:
   extends: .cloudrun:deploy
