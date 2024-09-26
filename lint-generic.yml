@@ -14,4 +14,11 @@ lint:
   script:
     - COMMAND="${APP_LINT_COMMAND_DEFAULT}"
 
+    - # test
+
+      if [ -n "${APP_LINT_COMMAND}" ]; then
+        echo "overriding command"
+        COMMAND="${APP_LINT_COMMAND}"
+      fi
+
     - eval "${COMMAND}"
