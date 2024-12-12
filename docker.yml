@@ -124,7 +124,6 @@ build:
       fi
   only:
     - /^v.+$/i
-    - /^qa.+$/i
     - master
     - merge_requests
   except:
@@ -220,7 +219,6 @@ build:cache:
       fi
   only:
     - /^v.+$/i
-    - /^qa.+$/i
     - master
     - merge_requests
   except:
