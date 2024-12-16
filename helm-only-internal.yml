@@ -83,4 +83,5 @@ helm:diff:internal:
       done
 
   rules:
-    - if: '($ENABLE_HELM_DIFF == "true") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && (($CI_PIPELINE_SOURCE == "merge_request_event") || ($CI_PIPELINE_SOURCE == "parent_pipeline"))'
+    - if: ($ENABLE_HELM_DIFF == "true") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "merge_request_event")
+    - if: ($ENABLE_HELM_DIFF == "true") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "parent_pipeline")

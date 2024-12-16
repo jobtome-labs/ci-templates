@@ -29,6 +29,7 @@ deploy:quality:
     SECRETS: ${SECRETS_QUALITY}
     INGRESS: ${INGRESS_QUALITY}
 
-  only:
-    - master
-    - /^qa.+$/i
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ "/^qa-.+$/i") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "merge_request_event")
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ "/^qa-.+$/i") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "parent_pipeline")

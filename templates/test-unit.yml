@@ -8,7 +8,6 @@
     - /^release/?.*$/i
     - /^v.+$/i
     - merge_requests
-    - /^qa.+$/i
   except:
     variables:
       - $SKIP_CI_TEST == "true"

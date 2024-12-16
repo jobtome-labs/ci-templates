@@ -10,7 +10,6 @@ sentry:release:set:
   only:
     - merge_requests
     - master
-    - /^qa.+$/i
     - /^v.+$/i
 
   when: on_success
@@ -25,7 +24,6 @@ sentry:release:finalize:
   only:
     - merge_requests
     - master
-    - /^qa.+$/i
     - /^v.+$/i
 
   when: on_success
@@ -40,7 +38,6 @@ sentry:notify:
   only:
     - merge_requests
     - master
-    - /^qa.+$/i
     - /^v.+$/i
 
   when: on_success

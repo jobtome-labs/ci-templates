@@ -33,9 +33,10 @@ deploy:helm:api:quality:
 
   resource_group: quality-api
 
-  only:
-    - master
-    - /^qa.+$/i
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ "/^qa-.+$/i") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "merge_request_event")
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ "/^qa-.+$/i") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "parent_pipeline")
 
 deploy:helm:web:quality:
   extends: .deploy:quality:helm
@@ -67,9 +68,10 @@ deploy:helm:web:quality:
 
   resource_group: quality-web
 
-  only:
-    - master
-    - /^qa.+$/i
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ "/^qa-.+$/i") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "merge_request_event")
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ "/^qa-.+$/i") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "parent_pipeline")
 
 verify:api:quality:
   extends: .verify
@@ -96,9 +98,10 @@ verify:api:quality:
         fi
       done
 
-  only:
-    - master
-    - /^qa.+$/i
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ "/^qa-.+$/i") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "merge_request_event")
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ "/^qa-.+$/i") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "parent_pipeline")
 
 verify:web:quality:
   extends: .verify
@@ -125,9 +128,10 @@ verify:web:quality:
         fi
       done
 
-  only:
-    - master
-    - /^qa.+$/i
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ "/^qa-.+$/i") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "merge_request_event")
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ "/^qa-.+$/i") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "parent_pipeline")
 
 helm:diff:api:quality:
   extends: .helm:diff
@@ -158,7 +162,8 @@ helm:diff:api:quality:
       done
 
   rules:
-    - if: '$ENABLE_HELM_DIFF == "true" && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+    - if: ($ENABLE_HELM_DIFF == "true") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "merge_request_event")
+    - if: ($ENABLE_HELM_DIFF == "true") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "parent_pipeline")
 
 helm:diff:web:quality:
   extends: .helm:diff
@@ -189,4 +194,5 @@ helm:diff:web:quality:
       done
 
   rules:
-    - if: '$ENABLE_HELM_DIFF == "true" && $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+    - if: ($ENABLE_HELM_DIFF == "true") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "merge_request_event")
+    - if: ($ENABLE_HELM_DIFF == "true") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "parent_pipeline")

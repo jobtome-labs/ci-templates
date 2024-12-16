@@ -15,7 +15,6 @@ endpoints:validate:quality:
     - merge_requests
     - master
     - main
-    - /^qa.+$/i
 
   except:
     variables:
@@ -30,10 +29,10 @@ endpoints:deploy:quality:
     ENDPOINTS_HOST: ${QUALITY_ENDPOINTS_HOST}
     ENDPOINTS_TITLE: ${QUALITY_ENDPOINTS_TITLE}
 
-  only:
-    - master
-    - main
-    - /^qa.+$/i
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ "/^qa-.+$/i") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "merge_request_event")
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ "/^qa-.+$/i") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "parent_pipeline")
 
   environment:
     name: quality
