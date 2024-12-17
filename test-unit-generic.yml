@@ -9,6 +9,14 @@ test:unit:
 
   variables:
     GIT_STRATEGY: none
+    APP_TEST_UNIT_COMMAND_DEFAULT: ">&2 echo 'ERROR: APP_TEST_UNIT_COMMAND Variable not set. Please set the Unit Tests Command to be executed by this Job.' ; exit 1"
 
   script:
-    - echo "<RUN_UNIT_TESTS_COMMAND>"
+    - COMMAND="${APP_TEST_UNIT_COMMAND_DEFAULT}"
+
+    - |
+      if [ -n "${APP_TEST_UNIT_COMMAND}" ]; then
+        COMMAND="${APP_TEST_UNIT_COMMAND}"
+      fi
+
+    - eval "${COMMAND}"
