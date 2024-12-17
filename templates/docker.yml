@@ -73,4 +73,3 @@ variables:
     - merge_requests
     - tags
     - master
-    - /^qa.+$/i

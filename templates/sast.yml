@@ -7,7 +7,6 @@
     - master
     - main
     - /^v.+$/i
-    - /^qa.+$/i
   except:
     variables:
       - $SKIP_SAST == "true"

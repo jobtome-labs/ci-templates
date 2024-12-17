@@ -1,5 +1,5 @@
 include:
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.37.2/templates/bucket.yml'
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.38.0/templates/bucket.yml"
 
 deploy:quality:
   extends: .deploy
@@ -7,6 +7,7 @@ deploy:quality:
     GOOGLE_KEY: ${GOOGLE_KEY_QUALITY}
     BUCKET_NAME: ${BUCKET_NAME_QUALITY}
     BUCKET_HEADERS: ${BUCKET_HEADERS_QUALITY}
-  only:
-    - master
-    - /^qa.+$/i
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ "/^qa-.+$/i") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "merge_request_event")
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ "/^qa-.+$/i") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "parent_pipeline")

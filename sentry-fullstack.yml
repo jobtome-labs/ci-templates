@@ -1,6 +1,6 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.37.2/templates/sentry.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.38.0/templates/sentry.yml"
 
 sentry:api:release:set:
   extends: .sentry:release:set
@@ -13,7 +13,6 @@ sentry:api:release:set:
   only:
     - merge_requests
     - master
-    - /^qa.+$/i
     - /^v.+$/i
 
   when: on_success
@@ -31,7 +30,6 @@ sentry:web:release:set:
   only:
     - merge_requests
     - master
-    - /^qa.+$/i
     - /^v.+$/i
 
   when: on_success
@@ -49,7 +47,6 @@ sentry:api:release:finalize:
   only:
     - merge_requests
     - master
-    - /^qa.+$/i
     - /^v.+$/i
 
   when: on_success
@@ -67,7 +64,6 @@ sentry:web:release:finalize:
   only:
     - merge_requests
     - master
-    - /^qa.+$/i
     - /^v.+$/i
 
   when: on_success
@@ -85,7 +81,6 @@ sentry:api:notify:
   only:
     - merge_requests
     - master
-    - /^qa.+$/i
     - /^v.+$/i
 
   when: on_success
@@ -103,7 +98,6 @@ sentry:web:notify:
   only:
     - merge_requests
     - master
-    - /^qa.+$/i
     - /^v.+$/i
 
   when: on_success

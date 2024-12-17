@@ -1,5 +1,5 @@
 include:
-  - remote: 'https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.37.2/templates/dataflow.yml'
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.38.0/templates/dataflow.yml"
 
 deploy:quality:dataflow:
   extends: .deploy:dataflow
@@ -12,7 +12,7 @@ deploy:quality:dataflow:
     EXTRA_ARGUMENTS: ${EXTRA_ARGUMENTS_QUALITY}
   environment:
     name: quality
-  only:
-    - master
-    - /^qa.+$/i
-
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ "/^qa-.+$/i") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "merge_request_event")
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ "/^qa-.+$/i") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "parent_pipeline")
