@@ -20,7 +20,7 @@ build:
 
       if [ -z "${IMAGES}" ]; then
 
-        COMMAND_TO_RUN=( docker build )
+        COMMAND_TO_RUN=( DOCKER_BUILDKIT=0 docker build )
 
         if [ "${SKIP_DOCKER_CACHE}" != "true" ]; then
           COMMAND_TO_RUN+=( --cache-from "${CI_REGISTRY_IMAGE}":latest --cache-from "${CI_REGISTRY_IMAGE}":"${CI_COMMIT_SHORT_SHA}" )
@@ -74,7 +74,7 @@ build:
 
         for image in ${IMAGES}; do
 
-          COMMAND_TO_RUN=( docker build )
+          COMMAND_TO_RUN=( DOCKER_BUILDKIT=0 docker build )
 
           if [ "${SKIP_DOCKER_CACHE}" != "true" ]; then
             COMMAND_TO_RUN+=( --cache-from "${CI_REGISTRY_IMAGE}/${image}:latest" --cache-from "${CI_REGISTRY_IMAGE}/${image}:${CI_COMMIT_SHORT_SHA}" )
@@ -151,7 +151,7 @@ build:cache:
         COMMAND_CACHE_FROM=()
 
         for stage in ${STAGES}; do
-          COMMAND_TO_RUN=( docker build --target "${stage}" --cache-from "${CI_REGISTRY_IMAGE}":latest-"${stage}" )
+          COMMAND_TO_RUN=( DOCKER_BUILDKIT=0 docker build --target "${stage}" --cache-from "${CI_REGISTRY_IMAGE}":latest-"${stage}" )
           COMMAND_TO_RUN+=( "${COMMAND_CACHE_FROM[@]}" )
 
           if [ -n "${GO_PROXY_URL}" ]; then
@@ -187,7 +187,7 @@ build:cache:
 
           for stage in ${STAGES}; do
 
-            COMMAND_TO_RUN=( docker build --target "${stage}" --cache-from "${CI_REGISTRY_IMAGE}"/"${image}":latest-"${stage}" )
+            COMMAND_TO_RUN=( DOCKER_BUILDKIT=0 docker build --target "${stage}" --cache-from "${CI_REGISTRY_IMAGE}"/"${image}":latest-"${stage}" )
 
             COMMAND_TO_RUN+=( "${COMMAND_CACHE_FROM[@]}" )
 
@@ -241,7 +241,7 @@ build:latest:
 
       if [ -z "${IMAGES}" ]; then
 
-        COMMAND_TO_RUN+=( docker build --cache-from "${CI_REGISTRY_IMAGE}":latest --cache-from "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}" )
+        COMMAND_TO_RUN+=( DOCKER_BUILDKIT=0 docker build --cache-from "${CI_REGISTRY_IMAGE}":latest --cache-from "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}" )
 
         for stage in ${STAGES}; do
           COMMAND_TO_RUN+=( --cache-from "${CI_REGISTRY_IMAGE}:latest-${stage}" )
@@ -284,7 +284,7 @@ build:latest:
 
         for image in ${IMAGES}; do
 
-          COMMAND_TO_RUN=( docker build --cache-from "${CI_REGISTRY_IMAGE}/${image}:latest" --cache-from "${CI_REGISTRY_IMAGE}/${image}:${CI_COMMIT_SHORT_SHA}" )
+          COMMAND_TO_RUN=( DOCKER_BUILDKIT=0 docker build --cache-from "${CI_REGISTRY_IMAGE}/${image}:latest" --cache-from "${CI_REGISTRY_IMAGE}/${image}:${CI_COMMIT_SHORT_SHA}" )
 
           for stage in ${STAGES}; do
             COMMAND_TO_RUN+=( --cache-from "${CI_REGISTRY_IMAGE}/${image}:latest-${stage}" )
