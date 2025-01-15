@@ -12,6 +12,9 @@ build:
     - |
       # DOCKER BUILD PHASE
 
+      export DOCKER_BUILDKIT=0
+      echo "export DOCKER_BUILDKIT=0"
+
       DOCKER_CONTEXT_PATH="."
 
       if [ -n "${DOCKER_CONTEXT}" ]; then
@@ -20,7 +23,8 @@ build:
 
       if [ -z "${IMAGES}" ]; then
 
-        COMMAND_TO_RUN=( DOCKER_BUILDKIT=0 docker build )
+
+        COMMAND_TO_RUN=( docker build )
 
         if [ "${SKIP_DOCKER_CACHE}" != "true" ]; then
           COMMAND_TO_RUN+=( --cache-from "${CI_REGISTRY_IMAGE}":latest --cache-from "${CI_REGISTRY_IMAGE}":"${CI_COMMIT_SHORT_SHA}" )
@@ -53,6 +57,8 @@ build:
 
         COMMAND_TO_RUN+=( -t "${IMAGE_FULL_NAME}" "${DOCKER_CONTEXT_PATH}" )
 
+        echo "DEBUG '${COMMAND_TO_RUN}'"
+
         "${COMMAND_TO_RUN[@]}"
 
         docker push "${IMAGE_FULL_NAME}"
@@ -74,7 +80,7 @@ build:
 
         for image in ${IMAGES}; do
 
-          COMMAND_TO_RUN=( DOCKER_BUILDKIT=0 docker build )
+          COMMAND_TO_RUN=( docker build )
 
           if [ "${SKIP_DOCKER_CACHE}" != "true" ]; then
             COMMAND_TO_RUN+=( --cache-from "${CI_REGISTRY_IMAGE}/${image}:latest" --cache-from "${CI_REGISTRY_IMAGE}/${image}:${CI_COMMIT_SHORT_SHA}" )
@@ -140,6 +146,9 @@ build:cache:
     - |
       # DOCKER BUILD PHASE
 
+      export DOCKER_BUILDKIT=0
+      echo "export DOCKER_BUILDKIT=0"
+
       DOCKER_CONTEXT_PATH="."
 
       if [ -n "${DOCKER_CONTEXT}" ]; then
@@ -151,7 +160,7 @@ build:cache:
         COMMAND_CACHE_FROM=()
 
         for stage in ${STAGES}; do
-          COMMAND_TO_RUN=( DOCKER_BUILDKIT=0 docker build --target "${stage}" --cache-from "${CI_REGISTRY_IMAGE}":latest-"${stage}" )
+          COMMAND_TO_RUN=( docker build --target "${stage}" --cache-from "${CI_REGISTRY_IMAGE}":latest-"${stage}" )
           COMMAND_TO_RUN+=( "${COMMAND_CACHE_FROM[@]}" )
 
           if [ -n "${GO_PROXY_URL}" ]; then
@@ -187,7 +196,7 @@ build:cache:
 
           for stage in ${STAGES}; do
 
-            COMMAND_TO_RUN=( DOCKER_BUILDKIT=0 docker build --target "${stage}" --cache-from "${CI_REGISTRY_IMAGE}"/"${image}":latest-"${stage}" )
+            COMMAND_TO_RUN=( docker build --target "${stage}" --cache-from "${CI_REGISTRY_IMAGE}"/"${image}":latest-"${stage}" )
 
             COMMAND_TO_RUN+=( "${COMMAND_CACHE_FROM[@]}" )
 
@@ -233,6 +242,9 @@ build:latest:
     - |
       # DOCKER BUILD PHASE
 
+      export DOCKER_BUILDKIT=0
+      echo "export DOCKER_BUILDKIT=0"
+
       DOCKER_CONTEXT_PATH="."
 
       if [ -n "${DOCKER_CONTEXT}" ]; then
@@ -241,7 +253,7 @@ build:latest:
 
       if [ -z "${IMAGES}" ]; then
 
-        COMMAND_TO_RUN+=( DOCKER_BUILDKIT=0 docker build --cache-from "${CI_REGISTRY_IMAGE}":latest --cache-from "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}" )
+        COMMAND_TO_RUN+=( docker build --cache-from "${CI_REGISTRY_IMAGE}":latest --cache-from "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}" )
 
         for stage in ${STAGES}; do
           COMMAND_TO_RUN+=( --cache-from "${CI_REGISTRY_IMAGE}:latest-${stage}" )
@@ -284,7 +296,7 @@ build:latest:
 
         for image in ${IMAGES}; do
 
-          COMMAND_TO_RUN=( DOCKER_BUILDKIT=0 docker build --cache-from "${CI_REGISTRY_IMAGE}/${image}:latest" --cache-from "${CI_REGISTRY_IMAGE}/${image}:${CI_COMMIT_SHORT_SHA}" )
+          COMMAND_TO_RUN=( docker build --cache-from "${CI_REGISTRY_IMAGE}/${image}:latest" --cache-from "${CI_REGISTRY_IMAGE}/${image}:${CI_COMMIT_SHORT_SHA}" )
 
           for stage in ${STAGES}; do
             COMMAND_TO_RUN+=( --cache-from "${CI_REGISTRY_IMAGE}/${image}:latest-${stage}" )
@@ -337,6 +349,9 @@ push:
     - *connection
     - |
       # DOCKER PUSH PHASE
+
+      export DOCKER_BUILDKIT=0
+      echo "export DOCKER_BUILDKIT=0"
 
       if [ -z "${IMAGES}" ]; then
         docker pull "${CI_REGISTRY_IMAGE}":"${CI_COMMIT_SHORT_SHA}"

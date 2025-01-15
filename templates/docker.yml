@@ -9,10 +9,6 @@
     - while ! nc -z localhost 2375; do sleep 0.1; done # Wait until Docker Socket is available
     - echo "Done."
 
-variables:
-  DOCKER_BUILDKIT: 1
-  COMPOSE_DOCKER_CLI_BUILD: 1
-
 .docker:build:multi:base:
   extends: .docker
 
