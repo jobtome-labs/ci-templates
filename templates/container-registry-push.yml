@@ -34,7 +34,17 @@
 
     - |
       # DOCKER PUSH PHASE
-
-      docker pull "${GITLAB_CONTAINER_REGISTRY_IMAGE_FULL_PATH}:${SOURCE_IMAGE_TAG}"
-      docker tag "${GITLAB_CONTAINER_REGISTRY_IMAGE_FULL_PATH}:${SOURCE_IMAGE_TAG}" "${CONTAINER_REGISTRY_IMAGE_FULL_PATH}:${DESTINATION_IMAGE_TAG}"
-      docker push "${CONTAINER_REGISTRY_IMAGE_FULL_PATH}:${DESTINATION_IMAGE_TAG}"
+          - |
+      if [ -z "${IMAGES}" ]; then
+        for image in $IMAGES; do
+          IMAGE_FULL_NAME="${CI_REGISTRY_IMAGE}/${image}:${CI_COMMIT_TAG}";
+          GCR_IMAGE_FULL_NAME="${GCR_IMAGE}/${image}:${CI_COMMIT_TAG}";
+          docker pull "${IMAGE_FULL_NAME}"
+          docker tag "${IMAGE_FULL_NAME}" "${GCR_IMAGE_FULL_NAME}"
+          docker push "${GCR_IMAGE_FULL_NAME}"
+        done
+      else
+        docker pull "${GITLAB_CONTAINER_REGISTRY_IMAGE_FULL_PATH}:${SOURCE_IMAGE_TAG}"
+        docker tag "${GITLAB_CONTAINER_REGISTRY_IMAGE_FULL_PATH}:${SOURCE_IMAGE_TAG}" "${CONTAINER_REGISTRY_IMAGE_FULL_PATH}:${DESTINATION_IMAGE_TAG}"
+        docker push "${CONTAINER_REGISTRY_IMAGE_FULL_PATH}:${DESTINATION_IMAGE_TAG}"
+      fi
