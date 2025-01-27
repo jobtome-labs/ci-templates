@@ -241,9 +241,6 @@ push:
     
     - |
       # DOCKER IMAGE PUSH
-      # TEMPORARY FIX
-      export DOCKER_HOST='tcp://docker-dind.gitlab-runner.svc.cluster.local:2375'
-
       if [ -z "${IMAGES}" ]; then
         docker pull "${CI_REGISTRY_IMAGE}":"${CI_COMMIT_SHORT_SHA}"
         docker tag "${CI_REGISTRY_IMAGE}":"${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}":"${CI_COMMIT_TAG}"
