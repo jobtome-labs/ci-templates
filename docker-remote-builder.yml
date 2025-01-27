@@ -234,15 +234,15 @@ push:
 
   script:
     - *docker_login
-    - *docker_remote_builder_setup
-    
-    - echo "Waiting for Docker Daemon at tcp://localhost:2375 .."
-    - while ! nc -z localhost 2375; do sleep 0.1; done # Wait until Docker Socket is available
-    - echo "Done."
     
     - |
       # DOCKER IMAGE PUSH
-    
+      # TEMPORARY FIX: with buildkit we need to either rely on an external dockerd to pull/push or change the CI and push contextually to build.
+      # There is no dockerd in the docker-cli base image used here. TBH to me it's ok to user the shared docker builder for pulling/tagging/pushing.
+      # In our scenario, builds and pushes happens in sepqarate stages, we need this flexibility. To avoid an additional sidecar in the runner and using
+      # the shared docker builder here, we could apk add podman to the base image and do a podman pull, podman tag, podman push.
+      export DOCKER_HOST="tcp://docker-dind.gitlab-runner.svc.cluster.local:2375"
+      
       if [ -z "${IMAGES}" ]; then
         docker pull "${CI_REGISTRY_IMAGE}":"${CI_COMMIT_SHORT_SHA}"
         docker tag "${CI_REGISTRY_IMAGE}":"${CI_COMMIT_SHORT_SHA}" "${CI_REGISTRY_IMAGE}":"${CI_COMMIT_TAG}"
