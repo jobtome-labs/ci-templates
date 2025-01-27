@@ -230,7 +230,12 @@ push:
   variables:
     GIT_STRATEGY: none
     BUILDX_BUILDER: "buildkitd"
-
+    
+  before_script:
+    - echo "Waiting for Docker Daemon at tcp://localhost:2375 .."
+    - while ! nc -z localhost 2375; do sleep 0.1; done # Wait until Docker Socket is available
+    - echo "Done."
+    
   script:
     - *docker_login
     
