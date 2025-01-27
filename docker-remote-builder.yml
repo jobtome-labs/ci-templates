@@ -234,6 +234,7 @@ push:
 
   script:
     - *docker_login
+    - *docker_remote_builder_setup
 
     - |
       # DOCKER IMAGE PUSH
