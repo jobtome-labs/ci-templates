@@ -1,11 +1,11 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.39.0/templates/test-unit.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.40.0/templates/test-unit.yml"
 
 test:unit:python:
   extends: .test:unit
 
-  image: "${CI_REGISTRY_IMAGE}/${APP_TEST_IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}"
+  image: "${CI_REGISTRY_IMAGE}/${APP_TEST_IMAGE_SUBPATH}${APP_TEST_IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}"
 
   script:
     - pytest
