@@ -34,7 +34,7 @@
 
     - |
       # DOCKER PUSH PHASE
-      if [ -z "${IMAGES}" ]; then
+      if [ -n "${IMAGES}" ]; then
         for image in $IMAGES; do
           docker pull "${GITLAB_CONTAINER_REGISTRY_IMAGE_FULL_PATH}/${image}:${SOURCE_IMAGE_TAG}"
           docker tag "${GITLAB_CONTAINER_REGISTRY_IMAGE_FULL_PATH}/${image}:${SOURCE_IMAGE_TAG}" "${CONTAINER_REGISTRY_IMAGE_FULL_PATH}/${image}:${DESTINATION_IMAGE_TAG}"

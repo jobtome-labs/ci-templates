@@ -1,5 +1,5 @@
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.40.3/templates/serverless.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.40.4/templates/serverless.yml"
 
 deploy:quality:
   extends: .serverless:deploy
