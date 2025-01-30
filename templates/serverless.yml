@@ -101,6 +101,20 @@
         COMMAND_TO_RUN+=( --max-instances=${MAX_INSTANCES} )
       fi
 
+      if [ -n "${DOCKER_REGISTRY}" ]; then
+        echo
+        echo "-> Setting '${DOCKER_REGISTRY}' docker registry!"
+        echo
+
+        COMMAND_TO_RUN+=( --docker-registry=${DOCKER_REGISTRY} )
+      else
+        echo
+        echo "-> Setting default docker registry to artifact-registry!"
+        echo
+
+        COMMAND_TO_RUN+=( --docker-registry=artifact-registry )
+      fi
+
       if [ -n "${TRIGGER_TOPIC}" ]; then
         echo
         echo "-> Setting trigger topic!"
