@@ -34,7 +34,7 @@
 
     - |
       # DOCKER PUSH PHASE
-      if [ -z "${IMAGES}" ]; then
+      if [ -n "${IMAGES}" ]; then
         for image in $IMAGES; do
           IMAGE_FULL_NAME="${CI_REGISTRY_IMAGE}/${image}:${CI_COMMIT_TAG}";
           GCR_IMAGE_FULL_NAME="${GCR_IMAGE}/${image}:${CI_COMMIT_TAG}";
