@@ -1,6 +1,6 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.40.2/templates/test-unit.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.40.3/templates/test-unit.yml"
 
 test:unit:js:
   extends: .test:unit
