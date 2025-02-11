@@ -1,0 +1,17 @@
+include:
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.41.0/templates/dataflow-deploy.yml"
+
+deploy:quality:dataflow:
+  extends: .deploy:dataflow-deploy
+  variables:
+    GAR_PASSWORD: ${GAR_PASSWORD}
+    GOOGLE_PROJECT: ${GOOGLE_PROJECT}
+    FLEX_TEMPLATE_GCS_PATH: ${FLEX_TEMPLATE_GCS_PATH}
+    SDK_LANGUAGE: ${SDK_LANGUAGE}
+    DATAFLOW_BUILD_EXTRA_ARGUMENTS: ${DATAFLOW_BUILD_EXTRA_ARGUMENTS}
+  environment:
+    name: prodution
+  only:
+    - /^v.+$/i
+  except:
+    - branches

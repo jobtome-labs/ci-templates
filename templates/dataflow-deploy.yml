@@ -1,0 +1,53 @@
+.deploy:dataflow-deploy:
+  stage: deploy
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/ci-image-gcp:v1.6.0
+  variables:
+    GIT_DEPTH: 1
+    GOOGLE_APPLICATION_CREDENTIALS: /tmp/key.json
+  script:
+    - &connection |
+      # CLUSTER CONNECTION PHASE
+      for var in "GAR_PASSWORD" "GOOGLE_PROJECT" "FLEX_TEMPLATE_GCS_PATH" "SDK_LANGUAGE" ; do
+          if [ -z "${!var}" ]; then
+            echo
+            echo "-> [WARNING] Missing '${var}' variable!"
+            echo
+            exit 1
+          fi
+      done
+      echo "${GAR_PASSWORD}" > /tmp/key.json
+      gcloud config set project ${GOOGLE_PROJECT}
+
+      echo "Google project '${GOOGLE_PROJECT}' configured"
+      gcloud auth activate-service-account --key-file /tmp/key.json
+
+    - |
+      # DEPLOY PHASE
+      echo
+      echo "-> Deploying flex template"
+      echo
+
+      COMMAND_TO_RUN=( gcloud dataflow flex-template build ${TEMPLATE_FILE_GCS_PATH} --project ${GOOGLE_PROJECT} --sdk-language ${SDK_LANGUAGE} )
+
+      echo
+      METADATA_FILE=spec/metadata.json
+      echo "-> Setting '${METADATA_FILE}' metadata file!"
+      COMMAND_TO_RUN+=( --metadata-file ${METADATA_FILE} )
+
+      echo
+      GAR_IMAGE_FULL_NAME="${CONTAINER_REGISTRY_IMAGE_FULL_PATH}:${CI_COMMIT_TAG}"
+      echo "-> Setting '${GAR_IMAGE_FULL_NAME}' docker image!"
+      echo
+      COMMAND_TO_RUN+=( --image ${GAR_IMAGE_FULL_NAME} )
+
+      if [ -n "${DATAFLOW_BUILD_EXTRA_ARGUMENTS}" ]; then
+        echo
+        echo "-> Setting '${DATAFLOW_BUILD_EXTRA_ARGUMENTS}' extra arguments!"
+        echo
+        COMMAND_TO_RUN+=( ${DATAFLOW_BUILD_EXTRA_ARGUMENTS} )
+      fi
+
+      "${COMMAND_TO_RUN[@]}"
+      echo
+      echo "-> Deploy of '${METADATA_FILE}' completed!"
+      echo

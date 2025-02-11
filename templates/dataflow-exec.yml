@@ -1,0 +1,71 @@
+.exec_dataflow_job:
+  stage: exec
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/ci-image-gcp:v1.6.0
+  variables:
+    GIT_DEPTH: 1
+    GOOGLE_APPLICATION_CREDENTIALS: /tmp/key.json
+  script:
+    - &connection |
+      # CLUSTER CONNECTION PHASE
+      for var in "GOOGLE_KEY" "GOOGLE_PROJECT" "JOB_NAME" "TEMPLATE_FILE_GCS_PATH"; do
+          if [ -z "${!var}" ]; then
+            echo
+            echo "-> [WARNING] Missing '${var}' variable!"
+            echo
+            exit 1
+          fi
+      done
+      echo "${GOOGLE_KEY}" > /tmp/key.json
+      gcloud config set project ${GOOGLE_PROJECT}
+
+      echo "Google project '${GOOGLE_PROJECT}' configured"
+      gcloud auth activate-service-account --key-file /tmp/key.json
+    - |
+      # DEPLOY PHASE
+      echo
+      echo "-> Executing job ${JOB_NAME} using flex template ${TEMPLATE_FILE_GCS_PATH}"
+      echo
+
+      COMMAND_TO_RUN=( gcloud dataflow flex-template run ${JOB_NAME} --project ${GOOGLE_PROJECT} )
+
+      echo
+      METADATA_FILE=spec/metadata.json
+      echo "-> Setting '${TEMPLATE_FILE_GCS_PATH}' metadata file!"
+      echo
+      COMMAND_TO_RUN+=( --template-file-gcs-location ${TEMPLATE_FILE_GCS_PATH} )
+
+      echo
+      echo "-> Setting '${TEMPORARY_LOCATION}' temporary location!"
+      echo
+      COMMAND_TO_RUN+=( --temp-location ${TEMPORARY_LOCATION} )
+
+      echo
+      echo "-> Setting '${STAGING_LOCATION}' staging location!"
+      echo
+      COMMAND_TO_RUN+=( --staging-location ${STAGING_LOCATION} )
+
+      echo
+      echo "-> Setting '${PARAM_INPUT_SUBSCRIPTION}' input subscription!"
+      echo
+      COMMAND_TO_RUN+=( --parameters input_subscription="${PARAM_INPUT_SUBSCRIPTION}" )
+
+      echo
+      echo "-> Setting '${PARAM_OUTPUT_DATASET}' BigQuery output dataset!"
+      echo
+      COMMAND_TO_RUN+=( --parameters output_dataset="${PARAM_OUTPUT_DATASET}" )
+
+      echo
+      echo "-> Setting '${DATAFLOW_SERVICE_ACCOUNT_EMAIL}' service account email!"
+      echo
+      COMMAND_TO_RUN+=( --service-account-email "${DATAFLOW_SERVICE_ACCOUNT_EMAIL}" )
+
+      if [ -n "${EXTRA_ARGUMENTS}" ]; then
+        echo
+        echo "-> Setting '${EXTRA_ARGUMENTS}' extra arguments!"
+        echo
+        COMMAND_TO_RUN+=( ${EXTRA_ARGUMENTS} )
+      fi
+      "${COMMAND_TO_RUN[@]}"
+      echo
+      echo "-> Execution of '${JOB_NAME}' started!"
+      echo
