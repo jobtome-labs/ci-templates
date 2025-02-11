@@ -1,0 +1,19 @@
+include:
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/feat/newdataflow/templates/dataflow-exec.yml"
+
+exec_dataflow_job:prod:
+  extends: .exec_dataflow_job
+  image: jobtomelabs/ci-image-gcp:v1.6.0
+  when: manual
+  allow_failure: true
+  variables:
+    JOB_NAME: ${JOB_NAME_PROD}
+    EXTRA_ARGUMENTS: ${DATAFLOW_RUN_EXTRA_ARGS_PROD}
+    GOOGLE_KEY: ${GOOGLE_KEY}
+    TEMPORARY_LOCATION: ${TEMPORARY_LOCATION_PROD}
+    STAGING_LOCATION: ${STAGING_LOCATION_PROD}
+    PARAM_INPUT_SUBSCRIPTION: ${PARAM_INPUT_SUBSCRIPTION_PROD}
+    PARAM_OUTPUT_DATASET: ${PARAM_OUTPUT_DATASET_PROD}
+    DATAFLOW_SERVICE_ACCOUNT_EMAIL: ${DATAFLOW_SERVICE_ACCOUNT_EMAIL_PROD}
+  environment:
+    name: production

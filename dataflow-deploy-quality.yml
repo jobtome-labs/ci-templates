@@ -1,0 +1,17 @@
+include:
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/feat/newdataflow/templates/dataflow-deploy.yml"
+
+deploy:quality:dataflow:
+  extends: .deploy:dataflow-deploy
+  variables:
+    GAR_PASSWORD: ${GAR_PASSWORD}
+    GOOGLE_PROJECT: ${GOOGLE_PROJECT}
+    FLEX_TEMPLATE_GCS_PATH: ${FLEX_TEMPLATE_GCS_PATH}
+    SDK_LANGUAGE: ${SDK_LANGUAGE}
+    DATAFLOW_BUILD_EXTRA_ARGUMENTS: ${DATAFLOW_BUILD_EXTRA_ARGUMENTS}
+  environment:
+    name: quality
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ "/^qa-.+$/i") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "merge_request_event")
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ "/^qa-.+$/i") && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master") && ($CI_PIPELINE_SOURCE == "parent_pipeline")
