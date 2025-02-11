@@ -1,6 +1,6 @@
 .deploy:dataflow-deploy:
   stage: deploy
-  image: jobtomelabs/ci-image-gcp:v1.6.0
+  image: europe-west1-docker.pkg.dev/jobtome-platform/public/ci-image-gcp:v1.6.0
   variables:
     GIT_DEPTH: 1
     GOOGLE_APPLICATION_CREDENTIALS: /tmp/key.json
