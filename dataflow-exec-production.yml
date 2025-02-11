@@ -3,7 +3,6 @@ include:
 
 exec_dataflow_job:prod:
   extends: .exec_dataflow_job
-  image: jobtomelabs/ci-image-gcp:v1.6.0
   when: manual
   allow_failure: true
   variables:
