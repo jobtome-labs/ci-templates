@@ -2,7 +2,7 @@
 
 FROM alpine:3.19 AS base
 
-ARG TOFU_VERSION=1.8.1
+ARG TOFU_VERSION=1.9.0
 
 RUN apk add --no-cache \
     coreutils \
