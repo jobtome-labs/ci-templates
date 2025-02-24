@@ -11,6 +11,8 @@ tfsec:security:scan:
     TFSEC_DEFAULT_IAC_TOOL_BINARY: "tofu"
 
   script:
+    - shopt -s expand_aliases
+
     - |
       if [ -n "${TFSEC_IAC_TOOL_BINARY}" ]; then
         TFSEC_IAC_TOOL_BINARY=${TFSEC_DEFAULT_IAC_TOOL_BINARY}
