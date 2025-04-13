@@ -1,56 +1,112 @@
+---
 helm:publish:
   image: europe-west1-docker.pkg.dev/jobtome-platform/public/devth-helm:v3.1.1
+
   stage: push
+
   script:
     - |
-      # CHECKING PHASE
-      for var in "GOOGLE_KEY" "BUCKET_NAME" "GOOGLE_PROJECT"; do
-          if [ -z "${!var}" ]; then
-            echo
-            echo "-> [WARNING] Missing '${var}' variable!"
-            echo
-            exit 1
-          fi
+      set -e
+
+      # VALIDATING VARIABLES
+
+      for var in "GOOGLE_PROJECT" "BUCKET_NAME" "GOOGLE_KEY"; do
+        if [ -z "${!var}" ]; then
+          echo
+          echo "[ERROR] Required Variable Not Set: \"${var}\"!"
+          echo
+
+          exit 1
+        fi
       done
 
-      # ACTIVATION PHASE
+      echo
+      echo "[SUCCESS] All Required Variables Set."
+      echo
+
+      # GOOGLE AUTHENTICATION
 
       echo "${GOOGLE_KEY}" > /tmp/key.json
-
       gcloud auth activate-service-account --key-file /tmp/key.json
-
       gcloud config set project "${GOOGLE_PROJECT}"
 
-      echo
-      echo "-> Google project '${GOOGLE_PROJECT}' configured!"
-      echo
+      # PACKAGE AND PUSH HELM CHART TO GOOGLE STORAGE BUCKET
 
-      # DEPLOY PHASE
+      COMMAND=( gsutil )
 
-      COMMAND_TO_RUN=( gsutil )
-
-      # Check if unset (but allow empty string)
       if [ -z "${BUCKET_PATH+x}" ]; then
         BUCKET_PATH="charts"
       fi
 
       if [ -n "${BUCKET_HEADERS}" ]; then
-        echo
-        echo "-> Setting '${BUCKET_HEADERS}' headers!"
-        echo
-
-        COMMAND_TO_RUN+=( -h "${BUCKET_HEADERS}" )
+        COMMAND+=( -h "${BUCKET_HEADERS}" )
       fi
 
       BUCKET_FULL_PATH="gs:/$(echo "/${BUCKET_NAME}/${BUCKET_PATH}/" | tr -s /)"
 
-      "${COMMAND_TO_RUN[@]}" cp ${BUCKET_FULL_PATH}index.yaml /tmp/index.yaml
+      echo
+      echo "[INFO] Google Storage Bucket Push Path: \"${BUCKET_FULL_PATH}\"."
+      echo
+
+      "${COMMAND[@]}" cp ${BUCKET_FULL_PATH}index.yaml /tmp/index.yaml || touch /tmp/index.yaml
 
       helm package .
+
       helm repo index . --merge /tmp/index.yaml
 
-      "${COMMAND_TO_RUN[@]}" cp ./index.yaml ${BUCKET_FULL_PATH}index.yaml
-      "${COMMAND_TO_RUN[@]}" cp ./*.tgz* ${BUCKET_FULL_PATH}
+      "${COMMAND[@]}" cp ./index.yaml ${BUCKET_FULL_PATH}index.yaml
+      "${COMMAND[@]}" cp ./*.tgz* ${BUCKET_FULL_PATH}
+
+      echo
+      echo "[INFO] Helm Chart Successfully Pushed to Google Storage Bucket."
+      echo
+
+      # PUSH HELM CHART TO GOOGLE ARTIFACT REGISTRY
+
+      if [ "${ENABLE_GOOGLE_ARTIFACT_REGISTRY_PUSH}" == "true" ]; then
+
+        echo
+        echo "[INFO] Pushing Helm Chart to Google Artifact Registry Enabled."
+        echo
+
+        # VALIDATING VARIABLES
+
+        if [ -z "${GOOGLE_ARTIFACT_REGISTRY_REPOSITORY}" ]; then
+          echo
+          echo "[ERROR] Required Variable Not Set: \"GOOGLE_ARTIFACT_REGISTRY_REPOSITORY\"!"
+          echo
+
+          exit 1
+        fi
+
+        ACCESS_TOKEN="$(gcloud auth print-access-token)"
+        helm registry login -u oauth2accesstoken -p "${ACCESS_TOKEN}" https://"${GOOGLE_ARTIFACT_REGISTRY_REPOSITORY}"
+
+        # Find Packaged Helm Chart (assume only one *.tgz)
+        HELM_CHART_PACKAGE=$(ls -1 *.tgz | head -n 1)
+
+        if [ -z "${HELM_CHART_PACKAGE}" ]; then
+          echo
+          echo "[ERROR] No Helm Chart Packages (*.tgz) Found!"
+          echo
+
+          exit 1
+        fi
+
+        helm push "${HELM_CHART_PACKAGE}" oci://"${GOOGLE_ARTIFACT_REGISTRY_REPOSITORY}"
+
+        echo
+        echo "[INFO] Helm Chart Successfully Pushed to Google Artifact Registry."
+        echo
+
+      else
+
+        echo
+        echo "[INFO] Pushing Helm Chart to Google Artifact Registry Disabled."
+        echo
+
+      fi
+
   only:
     - /^v.+$/i
   except:
