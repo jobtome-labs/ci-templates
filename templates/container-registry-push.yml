@@ -34,14 +34,23 @@
 
     - |
       # DOCKER PUSH PHASE
-      if [ -n "${IMAGES}" ]; then
-        for image in $IMAGES; do
-          docker pull "${GITLAB_CONTAINER_REGISTRY_IMAGE_FULL_PATH}/${image}:${SOURCE_IMAGE_TAG}"
-          docker tag "${GITLAB_CONTAINER_REGISTRY_IMAGE_FULL_PATH}/${image}:${SOURCE_IMAGE_TAG}" "${CONTAINER_REGISTRY_IMAGE_FULL_PATH}/${image}:${DESTINATION_IMAGE_TAG}"
-          docker push "${CONTAINER_REGISTRY_IMAGE_FULL_PATH}/${image}:${DESTINATION_IMAGE_TAG}"
+
+      if [ -n "${CONTAINER_REGISTRY_TARGETS}" ]; then
+        for target in $CONTAINER_REGISTRY_TARGETS; do
+          echo "Pushing ${GITLAB_CONTAINER_REGISTRY_IMAGE_FULL_PATH}/${target}:${SOURCE_IMAGE_TAG} .."
+
+          docker pull "${GITLAB_CONTAINER_REGISTRY_IMAGE_FULL_PATH}/${target}:${SOURCE_IMAGE_TAG}"
+          docker tag "${GITLAB_CONTAINER_REGISTRY_IMAGE_FULL_PATH}/${target}:${SOURCE_IMAGE_TAG}" "${CONTAINER_REGISTRY_IMAGE_FULL_PATH}/${target}:${DESTINATION_IMAGE_TAG}"
+          docker push "${CONTAINER_REGISTRY_IMAGE_FULL_PATH}/${target}:${DESTINATION_IMAGE_TAG}"
+
+          echo "Pushed to ${CONTAINER_REGISTRY_IMAGE_FULL_PATH}/${target}:${DESTINATION_IMAGE_TAG} Successfully."
         done
       else
+        echo "Pushing ${GITLAB_CONTAINER_REGISTRY_IMAGE_FULL_PATH}:${SOURCE_IMAGE_TAG} .."
+
         docker pull "${GITLAB_CONTAINER_REGISTRY_IMAGE_FULL_PATH}:${SOURCE_IMAGE_TAG}"
         docker tag "${GITLAB_CONTAINER_REGISTRY_IMAGE_FULL_PATH}:${SOURCE_IMAGE_TAG}" "${CONTAINER_REGISTRY_IMAGE_FULL_PATH}:${DESTINATION_IMAGE_TAG}"
         docker push "${CONTAINER_REGISTRY_IMAGE_FULL_PATH}:${DESTINATION_IMAGE_TAG}"
+
+        echo "Pushed to ${CONTAINER_REGISTRY_IMAGE_FULL_PATH}:${DESTINATION_IMAGE_TAG} Successfully."
       fi
