@@ -1,9 +1,16 @@
+---
 .serverless:deploy:
   image: europe-west1-docker.pkg.dev/jobtome-platform/public/ci-image-gcp:v1.6.0
+
   stage: deploy
+
+  variables:
+    GIT_DEPTH: 1
+
   script:
     - &connection |
       # CLUSTER CONNECTION PHASE
+
       for var in "GOOGLE_KEY" "FUNCTION_NAME" "RUNTIME" "REGION" "GOOGLE_PROJECT"; do
           if [ -z "${!var}" ]; then
             echo
@@ -12,14 +19,18 @@
             exit 1
           fi
       done
+
       echo "${GOOGLE_KEY}" > /tmp/key.json
 
       gcloud config set project ${GOOGLE_PROJECT}
 
       echo "Google project '${GOOGLE_PROJECT}' configured"
+
       gcloud auth activate-service-account --key-file /tmp/key.json
+
     - |
       # DEPLOY PHASE
+
       echo
       echo "-> Deploying function '${FUNCTION_NAME}' with tag '${CI_COMMIT_TAG}'"
       echo
@@ -101,20 +112,6 @@
         COMMAND_TO_RUN+=( --max-instances=${MAX_INSTANCES} )
       fi
 
-      if [ -n "${DOCKER_REGISTRY}" ]; then
-        echo
-        echo "-> Setting '${DOCKER_REGISTRY}' docker registry!"
-        echo
-
-        COMMAND_TO_RUN+=( --docker-registry=${DOCKER_REGISTRY} )
-      else
-        echo
-        echo "-> Setting default docker registry to artifact-registry!"
-        echo
-
-        COMMAND_TO_RUN+=( --docker-registry=artifact-registry )
-      fi
-
       if [ -n "${TRIGGER_TOPIC}" ]; then
         echo
         echo "-> Setting trigger topic!"
@@ -152,8 +149,7 @@
       echo
       echo "-> Deploy on ${ENVIRONMENT}: '${DOMAIN}' completed!"
       echo
+
   environment:
     name: ${ENVIRONMENT}
     url: https://${DOMAIN}
-  variables:
-    GIT_DEPTH: 1
