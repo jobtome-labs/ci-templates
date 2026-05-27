@@ -1,6 +1,6 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.46.0/templates/container-registry-push.yml"
+  - remote: "https://raw.githubusercontent.com/jobtome-labs/ci-templates/v3.47.0/templates/container-registry-push.yml"
 
 container-registry:push:quality:
   extends: .container-registry:push
@@ -9,7 +9,21 @@ container-registry:push:quality:
 
   variables:
     SOURCE_IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
-    DESTINATION_IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
+
+  before_script:
+    - echo "Waiting for Docker Daemon at tcp://localhost:2375 .."
+    - while ! nc -z localhost 2375; do sleep 0.1; done
+    - echo "Done."
+
+    - apk add --update coreutils
+
+    - |
+      if [ "${USE_COMMIT_TIMESTAMP_AS_QUALITY_TAG}" == "true" ]; then
+        export DESTINATION_IMAGE_TAG=$(TZ=UTC date -d"${CI_COMMIT_TIMESTAMP}" +%s)
+        echo "DESTINATION_IMAGE_TAG=\"${DESTINATION_IMAGE_TAG}\""
+      else
+        export DESTINATION_IMAGE_TAG="${CI_COMMIT_SHORT_SHA}"
+      fi
 
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
