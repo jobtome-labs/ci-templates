@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
-ARG TOFU_IMAGE_TAG=v1.9.0
-ARG TFSEC_IMAGE_TAG=v1.28.13
+ARG TOFU_IMAGE_TAG=v1.12.0
+ARG TFSEC_IMAGE_TAG=v1.28.14
 
 FROM aquasec/tfsec-alpine:${TFSEC_IMAGE_TAG} AS tfsec
 

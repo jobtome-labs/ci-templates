@@ -1,7 +1,7 @@
 ---
 .tofu:
   image:
-    name: europe-west1-docker.pkg.dev/jobtome-platform/public/tofu:v1.9.0
+    name: europe-west1-docker.pkg.dev/jobtome-platform/public/tofu:v1.12.0
 
   variables:
     GIT_DEPTH: 1
