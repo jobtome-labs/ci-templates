@@ -47,6 +47,16 @@ variables:
         fi
       fi
 
+    # Forward Optional Build Args; whitespace-separated "KEY=VALUE" pairs,
+    # so neither the key nor the value may contain spaces
+    - |
+      BUILD_ARGS_OPTION=""
+      if [ ! -z "$BUILD_ARGS" ]; then
+        for build_arg in $BUILD_ARGS; do
+          BUILD_ARGS_OPTION="$BUILD_ARGS_OPTION --build-arg $build_arg"
+        done
+      fi
+
     # Append Optional Tag Suffix
     - |
       if [ ! -z "$IMAGE_TAG_SUFFIX" ]; then
@@ -62,7 +72,7 @@ variables:
 
     # Login, Build Image and Push Tags
     - echo -n $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
-    - docker build --target $BUILD_TARGET $CACHE_FROM_OPTION -t $DOCKER_IMAGE_NAME -t $DOCKER_IMAGE_NAME_LATEST .
+    - docker build --target $BUILD_TARGET $CACHE_FROM_OPTION $BUILD_ARGS_OPTION -t $DOCKER_IMAGE_NAME -t $DOCKER_IMAGE_NAME_LATEST .
     - docker push $DOCKER_IMAGE_NAME
     - docker push $DOCKER_IMAGE_NAME_LATEST
 
