@@ -379,9 +379,25 @@ In natural language: there's a pipeline stage `build-cache` where the docker sta
     #CACHE_FROM: base
     #IMAGE_TAG_SUFFIX: debug
     #BUILD_TARGET: prod
+    #BUILD_ARGS: "FOO=bar BAZ=qux"
 ```
 
 NOTE: this job assumes that the Dockerfile is ONE, and in the root of the project.
+
+`BUILD_ARGS` is forwarded to `docker build` as one `--build-arg` per entry. The list is
+whitespace-separated, so neither the key nor the value may contain spaces. Typical use is
+passing a token to authenticate a private dependency registry from inside the build:
+
+```
+build-prod:
+  extends: .docker:build:multi
+  variables:
+    BUILD_TARGET: prod
+    BUILD_ARGS: "GITLAB_TOKEN=${CI_JOB_TOKEN}"
+```
+
+Beware that build args are visible in the image history of the stage that declares them, so
+prefer a short-lived credential such as `CI_JOB_TOKEN` over a long-lived personal token.
 
 This job does not override the jobs described above: to remove jobs `build` and `build:cache`, add to the .gitlab.ci.yml an override to never run them.
 
